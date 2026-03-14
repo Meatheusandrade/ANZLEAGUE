@@ -1,2233 +1,4666 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en-GB">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manager Mode EAFC</title>
-  <style>
-    :root {
-      --bg: #07111f;
-      --bg-2: #0f172a;
-      --panel: #101a2c;
-      --line: rgba(255,255,255,0.08);
-      --text: #e5edf8;
-      --muted: #93a4bd;
-      --accent: #38bdf8;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --shadow: 0 22px 52px rgba(0,0,0,0.28);
-      --radius: 20px;
-    }
-
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    button, input, select, textarea { font: inherit; }
-    .hidden { display: none !important; }
-
-    .login-shell {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .login-card {
-      width: min(1100px, 100%);
-      background: linear-gradient(180deg, rgba(23, 36, 56, 0.96), rgba(10, 17, 29, 0.98));
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-    }
-
-    .login-hero, .login-form { padding: 32px; }
-
-    .login-hero {
-      background: radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 45%), rgba(255,255,255,0.02);
-      border-right: 1px solid var(--line);
-    }
-
-    .login-badge, .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(56,189,248,0.3);
-      background: rgba(56,189,248,0.12);
-      color: #b6ebff;
-      font-size: 0.82rem;
-    }
-
-    .login-title {
-      margin: 18px 0 10px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1.05;
-    }
-
-    .login-copy {
-      color: var(--muted);
-      line-height: 1.6;
-      max-width: 52ch;
-      margin-bottom: 24px;
-    }
-
-    .login-points {
-      display: grid;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .login-point {
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .app-shell {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      padding: 24px 18px;
-      background: rgba(7, 17, 31, 0.92);
-      border-right: 1px solid var(--line);
-      backdrop-filter: blur(12px);
-      overflow-y: auto;
-    }
-
-    .brand {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .brand small {
-      display: block;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 8px;
-      line-height: 1.45;
-    }
-
-    .user-pill {
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .nav {
-      display: grid;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .nav button {
-      width: 100%;
-      text-align: left;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    .nav button:hover,
-    .nav button.active {
-      border-color: rgba(56,189,248,0.36);
-      background: rgba(56,189,248,0.14);
-      transform: translateY(-1px);
-    }
-
-    .sidebar-box {
-      margin-top: 22px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .main {
-      padding: 20px 24px 28px;
-      min-width: 0;
-    }
-
-    .sticky-topbar {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      margin-bottom: 18px;
-      padding: 16px 18px;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      background: rgba(12, 22, 38, 0.92);
-      backdrop-filter: blur(12px);
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .identity-row {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .identity-chip {
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      min-width: 120px;
-    }
-
-    .tab { display: none; }
-    .tab.active { display: block; }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .page-header h1,
-    .page-header h2,
-    .page-header h3 {
-      margin: 0 0 8px;
-    }
-
-    .breadcrumbs {
-      color: var(--muted);
-      font-size: 0.92rem;
-      margin-bottom: 10px;
-    }
-
-    .muted { color: var(--muted); }
-    .small { font-size: 0.88rem; color: var(--muted); }
-
-    .grid { display: grid; gap: 18px; }
-    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.18fr 0.82fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: linear-gradient(180deg, rgba(23, 36, 56, 0.95), rgba(12, 20, 35, 0.98));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
-
-    .hero-club {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .club-logo {
-      width: 104px;
-      height: 104px;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .club-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .club-cell {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 180px;
-    }
-
-    .table-logo {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-
-    .evidence-preview {
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      overflow: hidden;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .evidence-preview img {
-      display: block;
-      width: 100%;
-      max-height: 280px;
-      object-fit: contain;
-      background: rgba(0,0,0,0.2);
-    }
-
-    .club-logo span {
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-align: center;
-      padding: 10px;
-    }
-
-    .hero-title {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .hero-title h1 {
-      margin: 0;
-      font-size: clamp(1.6rem, 3vw, 2.3rem);
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      font-size: 0.86rem;
-    }
-
-    .chip.success {
-      color: #bbf7d0;
-      background: rgba(34,197,94,0.14);
-      border-color: rgba(34,197,94,0.28);
-    }
-
-    .chip.warning {
-      color: #fde68a;
-      background: rgba(245,158,11,0.14);
-      border-color: rgba(245,158,11,0.28);
-    }
-
-    .chip.danger {
-      color: #fecaca;
-      background: rgba(239,68,68,0.14);
-      border-color: rgba(239,68,68,0.28);
-    }
-
-    .card-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .stat-blocks {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .stat-box {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .stat-box .label {
-      display: block;
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .stat-box strong { font-size: 1.35rem; }
-
-    .list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .list-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .empty {
-      border: 1px dashed rgba(255,255,255,0.15);
-      border-radius: 16px;
-      padding: 20px;
-      color: var(--muted);
-      text-align: center;
-      background: rgba(255,255,255,0.02);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      font-size: 0.95rem;
-      vertical-align: top;
-    }
-
-    th {
-      color: var(--muted);
-      font-weight: 600;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 16px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      transition: 0.18s ease;
-    }
-
-    .btn.primary {
-      background: linear-gradient(180deg, rgba(56,189,248,0.24), rgba(56,189,248,0.14));
-      border-color: rgba(56,189,248,0.4);
-    }
-
-    .btn.success {
-      background: linear-gradient(180deg, rgba(34,197,94,0.24), rgba(34,197,94,0.14));
-      border-color: rgba(34,197,94,0.38);
-    }
-
-    .btn.warning {
-      background: linear-gradient(180deg, rgba(245,158,11,0.24), rgba(245,158,11,0.14));
-      border-color: rgba(245,158,11,0.38);
-    }
-
-    .btn.danger {
-      background: linear-gradient(180deg, rgba(239,68,68,0.24), rgba(239,68,68,0.14));
-      border-color: rgba(239,68,68,0.38);
-    }
-
-    .pill {
-      display: inline-flex;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-    }
-
-    .pill.pending {
-      color: #fde68a;
-      background: rgba(245,158,11,0.14);
-      border-color: rgba(245,158,11,0.26);
-    }
-
-    .pill.approved {
-      color: #bbf7d0;
-      background: rgba(34,197,94,0.14);
-      border-color: rgba(34,197,94,0.26);
-    }
-
-    .pill.rejected {
-      color: #fecaca;
-      background: rgba(239,68,68,0.14);
-      border-color: rgba(239,68,68,0.26);
-    }
-
-    .toast-wrap {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 50;
-      display: grid;
-      gap: 12px;
-      width: min(420px, calc(100vw - 36px));
-    }
-
-    .toast {
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(10, 18, 30, 0.96);
-      box-shadow: var(--shadow);
-    }
-
-    .event-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .event-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .section-divider {
-      margin: 24px 0 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    input[type="url"],
-    select,
-    textarea {
-      width: 100%;
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      outline: none;
-    }
-
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    @media (max-width: 980px) {
-      .login-card { grid-template-columns: 1fr; }
-      .login-hero { border-right: none; border-bottom: 1px solid var(--line); }
-      .app-shell { grid-template-columns: 1fr; }
-      .sidebar {
-        position: relative;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-      }
-    }
-
-    @media (max-width: 760px) {
-      .main { padding: 16px; }
-      .hero, .grid-4, .grid-3, .grid-2, .stat-blocks, .form-grid, .event-row {
-        grid-template-columns: 1fr;
-      }
-      .sticky-topbar { position: relative; }
-      .hero-club { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Manager Mode EAFC</title>
+ <style>
+  :root {
+   --bg: #07111f;
+   --bg-2: #0f172a;
+   --panel: #101a2c;
+   --line: rgba(255,255,255,0.08);
+   --text: #e5edf8;
+   --muted: #93a4bd;
+   --accent: #38bdf8;
+   --success: #22c55e;
+   --warning: #f59e0b;
+   --danger: #ef4444;
+   --shadow: 0 22px 52px rgba(0,0,0,0.28);
+   --radius: 20px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+   margin: 0;
+   padding: 0;
+   min-height: 100%;
+   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+   color: var(--text);
+   font-family: Arial, Helvetica, sans-serif;
+  }
+
+  button, input, select, textarea { font: inherit; }
+  .hidden { display: none !important; }
+
+  .login-shell {
+   min-height: 100vh;
+   display: grid;
+   place-items: center;
+   padding: 24px;
+  }
+
+  .login-card {
+   width: min(1100px, 100%);
+   background: linear-gradient(180deg, rgba(23, 36, 56, 0.96), rgba(10, 17, 29, 0.98));
+   border: 1px solid var(--line);
+   border-radius: 28px;
+   box-shadow: var(--shadow);
+   overflow: hidden;
+   display: grid;
+   grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .login-hero, .login-form { padding: 32px; }
+
+  .login-hero {
+   background: radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 45%), rgba(255,255,255,0.02);
+   border-right: 1px solid var(--line);
+  }
+
+  .login-badge, .badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+   padding: 7px 12px;
+   border-radius: 999px;
+   border: 1px solid rgba(56,189,248,0.3);
+   background: rgba(56,189,248,0.12);
+   color: #b6ebff;
+   font-size: 0.82rem;
+  }
+
+  .login-title {
+   margin: 18px 0 10px;
+   font-size: clamp(2rem, 4vw, 3rem);
+   line-height: 1.05;
+  }
+
+  .login-copy {
+   color: var(--muted);
+   line-height: 1.6;
+   max-width: 52ch;
+   margin-bottom: 24px;
+  }
+
+  .login-points {
+   display: grid;
+   gap: 12px;
+   margin-top: 24px;
+  }
+
+  .login-point {
+   padding: 14px 16px;
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .app-shell {
+   display: grid;
+   grid-template-columns: 280px 1fr;
+   min-height: 100vh;
+  }
+
+  .sidebar {
+   position: sticky;
+   top: 0;
+   height: 100vh;
+   padding: 24px 18px;
+   background: rgba(7, 17, 31, 0.92);
+   border-right: 1px solid var(--line);
+   backdrop-filter: blur(12px);
+   overflow-y: auto;
+  }
+
+  .brand {
+   font-size: 1.4rem;
+   font-weight: 700;
+   margin-bottom: 8px;
+  }
+
+  .brand small {
+   display: block;
+   color: var(--muted);
+   font-size: 0.9rem;
+   margin-top: 8px;
+   line-height: 1.45;
+  }
+
+  .user-pill {
+   margin-top: 16px;
+   padding: 14px;
+   border-radius: 16px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.03);
+  }
+
+  .nav {
+   display: grid;
+   gap: 10px;
+   margin-top: 22px;
+  }
+
+  .nav button {
+   width: 100%;
+   text-align: left;
+   padding: 14px 16px;
+   border-radius: 16px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.03);
+   color: var(--text);
+   cursor: pointer;
+   transition: 0.18s ease;
+  }
+
+  .nav button:hover,
+  .nav button.active {
+   border-color: rgba(56,189,248,0.36);
+   background: rgba(56,189,248,0.14);
+   transform: translateY(-1px);
+  }
+
+  .sidebar-box {
+   margin-top: 22px;
+   padding: 14px;
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .main {
+   padding: 20px 24px 28px;
+   min-width: 0;
+  }
+
+  .sticky-topbar {
+   position: sticky;
+   top: 0;
+   z-index: 5;
+   margin-bottom: 18px;
+   padding: 16px 18px;
+   border-radius: 20px;
+   border: 1px solid var(--line);
+   background: rgba(12, 22, 38, 0.92);
+   backdrop-filter: blur(12px);
+   display: flex;
+   justify-content: space-between;
+   gap: 16px;
+   flex-wrap: wrap;
+  }
+
+  .identity-row {
+   display: flex;
+   gap: 14px;
+   flex-wrap: wrap;
+   align-items: center;
+  }
+
+  .identity-chip {
+   padding: 10px 12px;
+   border-radius: 14px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.03);
+   min-width: 120px;
+  }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  .page-header {
+   display: flex;
+   justify-content: space-between;
+   gap: 16px;
+   align-items: flex-start;
+   flex-wrap: wrap;
+   margin-bottom: 18px;
+  }
+
+  .page-header h1,
+  .page-header h2,
+  .page-header h3 {
+   margin: 0 0 8px;
+  }
+
+  .breadcrumbs {
+   color: var(--muted);
+   font-size: 0.92rem;
+   margin-bottom: 10px;
+  }
+
+  .muted { color: var(--muted); }
+  .small { font-size: 0.88rem; color: var(--muted); }
+
+  .grid { display: grid; gap: 18px; }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .hero {
+   display: grid;
+   grid-template-columns: 1.18fr 0.82fr;
+   gap: 18px;
+   margin-bottom: 18px;
+  }
+
+  .card {
+   background: linear-gradient(180deg, rgba(23, 36, 56, 0.95), rgba(12, 20, 35, 0.98));
+   border: 1px solid var(--line);
+   border-radius: var(--radius);
+   box-shadow: var(--shadow);
+   padding: 18px;
+  }
+
+  .hero-club {
+   display: flex;
+   gap: 18px;
+   align-items: center;
+  }
+
+  .club-logo {
+   width: 104px;
+   height: 104px;
+   border-radius: 22px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.04);
+   display: grid;
+   place-items: center;
+   overflow: hidden;
+   flex-shrink: 0;
+  }
+
+  .club-logo img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+  }
+
+  .club-cell {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   min-width: 180px;
+  }
+
+  .table-logo {
+   width: 28px;
+   height: 28px;
+   object-fit: contain;
+   flex-shrink: 0;
+  }
+
+  .evidence-preview {
+   margin-top: 12px;
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   overflow: hidden;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .evidence-preview img {
+   display: block;
+   width: 100%;
+   max-height: 280px;
+   object-fit: contain;
+   background: rgba(0,0,0,0.2);
+  }
+
+  .club-logo span {
+   font-size: 0.82rem;
+   color: var(--muted);
+   text-align: center;
+   padding: 10px;
+  }
+
+  .hero-title {
+   display: flex;
+   gap: 10px;
+   flex-wrap: wrap;
+   align-items: center;
+   margin-bottom: 10px;
+  }
+
+  .hero-title h1 {
+   margin: 0;
+   font-size: clamp(1.6rem, 3vw, 2.3rem);
+  }
+
+  .chip {
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+   padding: 8px 12px;
+   border-radius: 999px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.04);
+   font-size: 0.86rem;
+  }
+
+  .chip.success {
+   color: #bbf7d0;
+   background: rgba(34,197,94,0.14);
+   border-color: rgba(34,197,94,0.28);
+  }
+
+  .chip.warning {
+   color: #fde68a;
+   background: rgba(245,158,11,0.14);
+   border-color: rgba(245,158,11,0.28);
+  }
+
+  .chip.danger {
+   color: #fecaca;
+   background: rgba(239,68,68,0.14);
+   border-color: rgba(239,68,68,0.28);
+  }
+
+  .card-row {
+   display: flex;
+   justify-content: space-between;
+   gap: 12px;
+   flex-wrap: wrap;
+   align-items: center;
+  }
+
+  .stat-blocks {
+   display: grid;
+   gap: 12px;
+   grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .stat-box {
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   padding: 14px;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .stat-box .label {
+   display: block;
+   font-size: 0.82rem;
+   color: var(--muted);
+   margin-bottom: 8px;
+  }
+
+  .stat-box strong { font-size: 1.35rem; }
+
+  .list {
+   display: grid;
+   gap: 12px;
+  }
+
+  .list-item {
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   padding: 14px;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .empty {
+   border: 1px dashed rgba(255,255,255,0.15);
+   border-radius: 16px;
+   padding: 20px;
+   color: var(--muted);
+   text-align: center;
+   background: rgba(255,255,255,0.02);
+  }
+
+  table {
+   width: 100%;
+   border-collapse: collapse;
+  }
+
+  th, td {
+   padding: 12px 10px;
+   border-bottom: 1px solid var(--line);
+   text-align: left;
+   font-size: 0.95rem;
+   vertical-align: top;
+  }
+
+  th {
+   color: var(--muted);
+   font-weight: 600;
+   background: rgba(255,255,255,0.03);
+  }
+
+  .table-wrap {
+   overflow-x: auto;
+   border-radius: 16px;
+   border: 1px solid var(--line);
+  }
+
+  .actions {
+   display: flex;
+   gap: 10px;
+   flex-wrap: wrap;
+  }
+
+  .btn {
+   border: 1px solid var(--line);
+   border-radius: 14px;
+   padding: 12px 16px;
+   cursor: pointer;
+   background: rgba(255,255,255,0.04);
+   color: var(--text);
+   transition: 0.18s ease;
+  }
+
+  .btn.primary {
+   background: linear-gradient(180deg, rgba(56,189,248,0.24), rgba(56,189,248,0.14));
+   border-color: rgba(56,189,248,0.4);
+  }
+
+  .btn.success {
+   background: linear-gradient(180deg, rgba(34,197,94,0.24), rgba(34,197,94,0.14));
+   border-color: rgba(34,197,94,0.38);
+  }
+
+  .btn.warning {
+   background: linear-gradient(180deg, rgba(245,158,11,0.24), rgba(245,158,11,0.14));
+   border-color: rgba(245,158,11,0.38);
+  }
+
+  .btn.danger {
+   background: linear-gradient(180deg, rgba(239,68,68,0.24), rgba(239,68,68,0.14));
+   border-color: rgba(239,68,68,0.38);
+  }
+
+  .pill {
+   display: inline-flex;
+   padding: 5px 10px;
+   border-radius: 999px;
+   font-size: 0.8rem;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.04);
+  }
+
+  .pill.pending {
+   color: #fde68a;
+   background: rgba(245,158,11,0.14);
+   border-color: rgba(245,158,11,0.26);
+  }
+
+  .pill.approved {
+   color: #bbf7d0;
+   background: rgba(34,197,94,0.14);
+   border-color: rgba(34,197,94,0.26);
+  }
+
+  .pill.rejected {
+   color: #fecaca;
+   background: rgba(239,68,68,0.14);
+   border-color: rgba(239,68,68,0.26);
+  }
+
+  .toast-wrap {
+   position: fixed;
+   right: 18px;
+   bottom: 18px;
+   z-index: 50;
+   display: grid;
+   gap: 12px;
+   width: min(420px, calc(100vw - 36px));
+  }
+
+  .toast {
+   padding: 14px 16px;
+   border-radius: 16px;
+   border: 1px solid var(--line);
+   background: rgba(10, 18, 30, 0.96);
+   box-shadow: var(--shadow);
+  }
+
+  .event-grid {
+   display: grid;
+   gap: 12px;
+  }
+
+  .event-row {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 12px;
+   padding: 12px;
+   border-radius: 14px;
+   border: 1px solid var(--line);
+   background: rgba(255,255,255,0.03);
+  }
+
+  .section-divider {
+   margin: 24px 0 16px;
+   padding-top: 16px;
+   border-top: 1px solid var(--line);
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="url"],
+  select,
+  textarea {
+   width: 100%;
+   background: rgba(255,255,255,0.04);
+   color: var(--text);
+   border: 1px solid var(--line);
+   border-radius: 14px;
+   padding: 12px 14px;
+   outline: none;
+  }
+
+  textarea {
+   min-height: 110px;
+   resize: vertical;
+  }
+
+  label {
+   display: block;
+   font-size: 0.9rem;
+   color: var(--muted);
+   margin-bottom: 8px;
+  }
+
+  .form-grid {
+   display: grid;
+   gap: 16px;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 980px) {
+   .login-card { grid-template-columns: 1fr; }
+   .login-hero { border-right: none; border-bottom: 1px solid var(--line); }
+   .app-shell { grid-template-columns: 1fr; }
+   .sidebar {
+    position: relative;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+   }
+  }
+
+  @media (max-width: 760px) {
+   .main { padding: 16px; }
+   .hero, .grid-4, .grid-3, .grid-2, .stat-blocks, .form-grid, .event-row {
+    grid-template-columns: 1fr;
+   }
+   .sticky-topbar { position: relative; }
+   .hero-club { flex-direction: column; align-items: flex-start; }
+  }
+ </style>
 </head>
 <body>
-  <div id="loginShell" class="login-shell"></div>
-  <div id="appShell" class="app-shell hidden"></div>
-  <div id="toastWrap" class="toast-wrap"></div>
-
-  <script>
-    const STORAGE_KEY = "eafc_manager_mode_embedded_v1";
-
-    const defaultUiState = {
-      currentUserId: null,
-      currentTab: "meu-clube",
-      selectedMatchId: null
-    };
-
-    let state = {
-      league: { name: "", season: "" },
-      currentUserId: null,
-      currentTab: "meu-clube",
-      selectedMatchId: null,
-      users: [],
-      clubs: [],
-      players: [],
-      matches: []
-    };
-
-    function loadEmbeddedJSON(scriptId) {
-      const el = document.getElementById(scriptId);
-      if (!el) {
-        throw new Error(`Bloco JSON não encontrado: ${scriptId}`);
-      }
-      return JSON.parse(el.textContent);
-    }
-
-    async function init() {
-      try {
-        const [appData, clubsData, playersData, matchesData] = await Promise.all([
-          fetch("./data/app-data.json").then(r => r.json()),
-          fetch("./data/clubs.json").then(r => r.json()),
-          fetch("./data/players.json").then(r => r.json()),
-          fetch("./data/matches.json").then(r => r.json())
-        ]);
-
-        const savedUi = loadUiState();
-
-        const snapshot = loadLocalSnapshot();
-
-        state = normalizeState({
-          league: appData.league || { name: "", season: "" },
-          currentUserId: savedUi.currentUserId,
-          currentTab: savedUi.currentTab || "meu-clube",
-          selectedMatchId: savedUi.selectedMatchId || null,
-          users: appData.users || [],
-          clubs: clubsData || [],
-          players: playersData || [],
-          matches: mergeMatches(matchesData || [], snapshot?.matches || [])
-        });
-
-        render();
-      } catch (error) {
-        document.body.innerHTML = `
-          <div style="padding:40px;max-width:900px;margin:0 auto;">
-            <h1>Erro ao carregar os dados embutidos</h1>
-            <p>Confirma se os blocos JSON foram colados correctamente dentro do HTML.</p>
-            <pre>${escapeHtml(String(error))}</pre>
-          </div>
-        `;
-      }
-    }
-
-    function loadUiState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(defaultUiState);
-      try {
-        return { ...structuredClone(defaultUiState), ...JSON.parse(raw) };
-      } catch {
-        return structuredClone(defaultUiState);
-      }
-    }
-
-    function saveUiState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        currentUserId: state.currentUserId,
-        currentTab: state.currentTab,
-        selectedMatchId: state.selectedMatchId
-      }));
-    }
-
-    function loadLocalSnapshot() {
-      const raw = localStorage.getItem("eafc_manager_mode_embedded_snapshot");
-      if (!raw) return null;
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return null;
-      }
-    }
-
-    function mergeMatches(baseMatches, snapshotMatches) {
-      if (!Array.isArray(snapshotMatches) || !snapshotMatches.length) return baseMatches;
-      const snapshotById = new Map(snapshotMatches.map(match => [match.id, match]));
-      return baseMatches.map(match => snapshotById.get(match.id) || match);
-    }
-
-    function normalizeState(inputState) {
-      const clone = structuredClone(inputState);
-
-      clone.clubs = (clone.clubs || []).map(club => ({
-        ...club,
-        squad: normalizeSquad(club.squad || [])
-      }));
-
-      clone.matches = (clone.matches || []).map(match => ({
-        ...match,
-        events: Array.isArray(match.events) ? match.events : [],
-        audit: Array.isArray(match.audit) ? match.audit : [],
-        evidenceImage: match?.evidenceImage || ""
-      }));
-
-      return clone;
-    }
-
-    function normalizeSquad(squad) {
-      return squad.map(player => {
-        if (typeof player === "string") return { id: null, name: player };
-        return {
-          id: player?.id ?? null,
-          name: player?.name ?? ""
-        };
-      }).filter(player => player.name);
-    }
-
-    function saveAllToLocalSnapshot() {
-      localStorage.setItem("eafc_manager_mode_embedded_snapshot", JSON.stringify({
-        matches: state.matches
-      }));
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function toast(message, type = "success") {
-      const wrap = document.getElementById("toastWrap");
-      const el = document.createElement("div");
-      el.className = `toast ${type}`;
-      el.innerHTML = `<strong>${type === "success" ? "Sucesso" : type === "warning" ? "Aviso" : "Atenção"}</strong><div class="small" style="margin-top:6px;color:var(--text);">${escapeHtml(message)}</div>`;
-      wrap.appendChild(el);
-      setTimeout(() => el.remove(), 3200);
-    }
-
-    function isAdmin() {
-      const user = getCurrentUser();
-      return user?.role === "admin";
-    }
-
-    function nowStamp() {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
-
-    function getCurrentUser() {
-      return state.users.find(user => user.id === state.currentUserId) || null;
-    }
-
-    function getClubById(id) {
-      return state.clubs.find(club => club.id === id) || null;
-    }
-
-    function getMatchById(id) {
-      return state.matches.find(match => match.id === id) || null;
-    }
-
-    function getCurrentClub() {
-      const user = getCurrentUser();
-      if (!user || !user.clubId) return null;
-      return getClubById(user.clubId);
-    }
-
-    function getSquadList(clubId) {
-      return getClubById(clubId)?.squad || [];
-    }
-
-    function getClubLogoUrl(club) {
-      if (!club) return "";
-      if (club.logoUrl) return club.logoUrl;
-      const fallbackMap = {
-        "Arsenal": "https://cdn.sofifa.net/meta/team/19/240.png",
-        "Aston Villa": "https://cdn.sofifa.net/meta/team/2/240.png",
-        "Liverpool": "https://cdn.sofifa.net/meta/team/8/240.png",
-        "Manchester City": "https://cdn.sofifa.net/meta/team/10/240.png"
-      };
-      return fallbackMap[club.name] || "";
-    }
-
-    function renderClubCell(clubName, logoUrl) {
-      const logo = logoUrl ? `<img class="table-logo" src="${escapeHtml(logoUrl)}" alt="${escapeHtml(clubName)}" />` : "";
-      return `<div class="club-cell">${logo}<span>${escapeHtml(clubName)}</span></div>`;
-    }
-
-
-    function sortText(a, b) {
-      return String(a ?? "").localeCompare(String(b ?? ""), "pt-BR", { sensitivity: "base" });
-    }
-
-    function getSortedSquadList(clubId) {
-      return [...getSquadList(clubId)].sort((a, b) => sortText(a.name, b.name));
-    }
-
-    function renderEvidencePreview(match) {
-      if (!match?.evidenceImage) return "";
-      return `
-        <div class="evidence-preview">
-          <img src="${match.evidenceImage}" alt="Evidência da partida" />
-        </div>
-      `;
-    }
-
-    function formatMatchLabel(match) {
-      const home = getClubById(match.homeClubId);
-      const away = getClubById(match.awayClubId);
-      return `${home?.name || "?"} vs ${away?.name || "?"}`;
-    }
-
-    function getApprovedMatches() {
-      return state.matches.filter(match => match.status === "approved");
-    }
-
-    function getClubApprovedMatches(clubId) {
-      return getApprovedMatches().filter(match => match.homeClubId === clubId || match.awayClubId === clubId);
-    }
-
-    function getClubAllMatches(clubId) {
-      return state.matches.filter(match => match.homeClubId === clubId || match.awayClubId === clubId);
-    }
-
-    function getClubPendingMatches(clubId) {
-      return state.matches.filter(match => match.status === "pending" && (match.homeClubId === clubId || match.awayClubId === clubId));
-    }
-
-    function getClubScheduledMatches(clubId) {
-      return state.matches.filter(match => match.status === "scheduled" && (match.homeClubId === clubId || match.awayClubId === clubId));
-    }
-
-    function getClubNextMatch(clubId) {
-      return getClubScheduledMatches(clubId).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
-    }
-
-    function getClubForm(clubId, limit = 5) {
-      const matches = getClubApprovedMatches(clubId)
-        .sort((a, b) => String(b.date).localeCompare(String(a.date)))
-        .slice(0, limit);
-
-      return matches.map(match => {
-        const isHome = match.homeClubId === clubId;
-        const gf = isHome ? Number(match.homeGoals) : Number(match.awayGoals);
-        const ga = isHome ? Number(match.awayGoals) : Number(match.homeGoals);
-        if (gf > ga) return "V";
-        if (gf < ga) return "D";
-        return "E";
-      });
-    }
-
-    function getClubStatsFromMatches(clubId) {
-      const approvedMatches = getClubApprovedMatches(clubId);
-      let played = 0, wins = 0, draws = 0, losses = 0, gf = 0, ga = 0;
-
-      approvedMatches.forEach(match => {
-        const isHome = match.homeClubId === clubId;
-        const goalsFor = isHome ? Number(match.homeGoals) : Number(match.awayGoals);
-        const goalsAgainst = isHome ? Number(match.awayGoals) : Number(match.homeGoals);
-
-        played += 1;
-        gf += goalsFor;
-        ga += goalsAgainst;
-
-        if (goalsFor > goalsAgainst) wins += 1;
-        else if (goalsFor < goalsAgainst) losses += 1;
-        else draws += 1;
-      });
-
-      return {
-        played, wins, draws, losses, gf, ga,
-        gd: gf - ga,
-        points: wins * 3 + draws
-      };
-    }
-
-    function buildLeagueTable() {
-      const rows = state.clubs.map(club => ({
-        clubId: club.id,
-        clubName: club.name,
-        shortName: club.shortName,
-        ...getClubStatsFromMatches(club.id)
-      }));
-
-      rows.sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.gd !== a.gd) return b.gd - a.gd;
-        if (b.gf !== a.gf) return b.gf - a.gf;
-        return a.clubName.localeCompare(b.clubName);
-      });
-
-      return rows.map((row, index) => ({ ...row, position: index + 1 }));
-    }
-
-    function getReducedTableForClub(clubId) {
-      const table = buildLeagueTable();
-      const index = table.findIndex(row => row.clubId === clubId);
-      if (index === -1) return [];
-      return table.slice(Math.max(0, index - 1), Math.min(table.length, index + 2));
-    }
-
-    function getClubNarrative(clubId) {
-      const table = buildLeagueTable();
-      const row = table.find(item => item.clubId === clubId);
-      if (!row) return "Ainda não há jogos aprovados para gerar contexto da temporada.";
-
-      const above = table[row.position - 2];
-      const below = table[row.position];
-      let text = `${row.clubName} está em ${row.position}º lugar com ${row.points} pontos.`;
-      if (above) text += ` Está a ${above.points - row.points} ponto(s) de ${above.clubName}.`;
-      if (below) text += ` Tem ${row.points - below.points} ponto(s) de vantagem sobre ${below.clubName}.`;
-      return text;
-    }
-
-
-    function getClubPlayerStats(clubId) {
-      const squad = getSortedSquadList(clubId);
-      const map = new Map();
-
-      squad.forEach(player => {
-        map.set(player.name, {
-          id: player.id,
-          name: player.name,
-          goals: 0,
-          assists: 0,
-          yellow: 0,
-          red: 0
-        });
-      });
-
-      getClubApprovedMatches(clubId).forEach(match => {
-        match.events.forEach(event => {
-          const isClubEvent = (event.teamSide === "home" && match.homeClubId === clubId) || (event.teamSide === "away" && match.awayClubId === clubId);
-          if (!isClubEvent) return;
-
-          if (event.player && map.has(event.player)) {
-            if (event.type === "goal") map.get(event.player).goals += 1;
-            if (event.type === "yellow") map.get(event.player).yellow += 1;
-            if (event.type === "red") map.get(event.player).red += 1;
-          }
-
-          if (event.type === "goal" && event.assist && event.assist !== "Sem assistência" && map.has(event.assist)) {
-            map.get(event.assist).assists += 1;
-          }
-        });
-      });
-
-      return [...map.values()].sort((a, b) => sortText(a.name, b.name));
-    }
-
-    function getTopScorer(clubId) {
-      return getClubPlayerStats(clubId)[0] || null;
-    }
-
-    function getTopAssist(clubId) {
-      return [...getClubPlayerStats(clubId)].sort((a, b) => {
-        if (b.assists !== a.assists) return b.assists - a.assists;
-        if (b.goals !== a.goals) return b.goals - a.goals;
-        return a.name.localeCompare(b.name);
-      })[0] || null;
-    }
-
-    function getMostBooked(clubId) {
-      return [...getClubPlayerStats(clubId)].sort((a, b) => {
-        const totalA = a.yellow + a.red * 2;
-        const totalB = b.yellow + b.red * 2;
-        if (totalB !== totalA) return totalB - totalA;
-        return a.name.localeCompare(b.name);
-      })[0] || null;
-    }
-
-
-
-    function getAllPlayerStats() {
-      const map = new Map();
-
-      state.clubs.forEach(club => {
-        getSortedSquadList(club.id).forEach(player => {
-          const key = `${club.id}::${player.name}`;
-          map.set(key, {
-            clubId: club.id,
-            clubName: club.name,
-            playerName: player.name,
-            goals: 0,
-            assists: 0,
-            yellow: 0,
-            red: 0
-          });
-        });
-      });
-
-      getApprovedMatches().forEach(match => {
-        match.events.forEach(event => {
-          const clubId = event.teamSide === "home" ? match.homeClubId : match.awayClubId;
-          const key = `${clubId}::${event.player}`;
-          if (event.player && map.has(key)) {
-            if (event.type === "goal") map.get(key).goals += 1;
-            if (event.type === "yellow") map.get(key).yellow += 1;
-            if (event.type === "red") map.get(key).red += 1;
-          }
-
-          if (event.type === "goal" && event.assist && event.assist !== "Sem assistência") {
-            const assistKey = `${clubId}::${event.assist}`;
-            if (map.has(assistKey)) map.get(assistKey).assists += 1;
-          }
-        });
-      });
-
-      return [...map.values()];
-    }
-
-    function getLeagueTopScorers(limit = 10) {
-      return getAllPlayerStats()
-        .filter(player => player.goals > 0)
-        .sort((a, b) => {
-          if (b.goals !== a.goals) return b.goals - a.goals;
-          if (b.assists !== a.assists) return b.assists - a.assists;
-          return sortText(a.playerName, b.playerName);
-        })
-        .slice(0, limit);
-    }
-
-    function getLeagueMostBooked(limit = 10) {
-      return getAllPlayerStats()
-        .filter(player => player.yellow > 0 || player.red > 0)
-        .sort((a, b) => {
-          const totalA = a.yellow + a.red * 2;
-          const totalB = b.yellow + b.red * 2;
-          if (totalB !== totalA) return totalB - totalA;
-          if (b.red !== a.red) return b.red - a.red;
-          return sortText(a.playerName, b.playerName);
-        })
-        .slice(0, limit);
-    }
-
-    function getMatchesGroupedByRound() {
-      const grouped = new Map();
-
-      [...state.matches]
-        .sort((a, b) => {
-          if (Number(a.round) !== Number(b.round)) return Number(a.round) - Number(b.round);
-          return sortText(a.date, b.date);
-        })
-        .forEach(match => {
-          const roundKey = Number(match.round) || 0;
-          if (!grouped.has(roundKey)) grouped.set(roundKey, []);
-          grouped.get(roundKey).push(match);
-        });
-
-      return [...grouped.entries()].map(([round, matches]) => ({ round, matches }));
-    }
-
-    function getPendingApprovalsForUser() {
-      const user = getCurrentUser();
-      if (!user) return [];
-
-      return state.matches.filter(match => {
-        if (match.status !== "pending") return false;
-        if (user.role === "admin") return true;
-        if (!user.clubId) return false;
-
-        const involved = match.homeClubId === user.clubId || match.awayClubId === user.clubId;
-        if (!involved) return false;
-
-        return match.submittedByUserId !== user.id;
-      });
-    }
-
-    function canSubmitMatch(homeClubId, awayClubId) {
-      const user = getCurrentUser();
-      if (!user) return false;
-      if (user.role === "admin") return true;
-      if (!user.clubId) return false;
-      return user.clubId === homeClubId || user.clubId === awayClubId;
-    }
-
-    function canApproveMatch(match) {
-      const user = getCurrentUser();
-      if (!user) return false;
-      if (user.role === "admin") return true;
-      if (!user.clubId) return false;
-
-      const involved = match.homeClubId === user.clubId || match.awayClubId === user.clubId;
-      if (!involved) return false;
-      return match.submittedByUserId !== user.id && match.status === "pending";
-    }
-
-    function switchTab(tab) {
-      state.currentTab = tab;
-      saveUiState();
-      render();
-    }
-
-    function login(userId) {
-      state.currentUserId = Number(userId);
-      state.currentTab = "meu-clube";
-      saveUiState();
-      render();
-      toast(`Sessão iniciada como ${getCurrentUser().name}.`);
-    }
-
-    function logout() {
-      state.currentUserId = null;
-      saveUiState();
-      render();
-      toast("Sessão terminada.", "warning");
-    }
-
-    function openMatch(matchId) {
-      state.selectedMatchId = Number(matchId);
-      state.currentTab = "partidas";
-      saveUiState();
-      render();
-    }
-
-    function render() {
-      if (!state.currentUserId) renderLogin();
-      else renderApp();
-    }
-
-    function renderLogin() {
-      const loginShell = document.getElementById("loginShell");
-      const appShell = document.getElementById("appShell");
-
-      appShell.classList.add("hidden");
-      loginShell.classList.remove("hidden");
-
-      loginShell.innerHTML = `
-        <div class="login-card">
-          <div class="login-hero">
-            <span class="login-badge">Sistema central da carreira</span>
-            <h1 class="login-title">Manager Mode EAFC</h1>
-            <p class="login-copy">
-              O EAFC fica só para jogar as partidas e tirar a evidência. O resto da gestão acontece aqui:
-              clube, calendário, resultados, aprovação, tabela, estatísticas e histórico.
-            </p>
-
-            <div class="login-points">
-              <div class="login-point">
-                <strong>Visão por utilizador</strong>
-                <div class="small">Cada manager entra directamente no ponto de vista do seu próprio clube.</div>
-              </div>
-              <div class="login-point">
-                <strong>Elenco centralizado</strong>
-                <div class="small">Golos, assistências e cartões são puxados automaticamente do elenco do clube.</div>
-              </div>
-              <div class="login-point">
-                <strong>Permissões separadas</strong>
-                <div class="small">O administrador vê e gere tudo. O manager vê e edita só o que faz sentido para ele.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="login-form">
-            <h2>Entrar no sistema</h2>
-            <p class="muted">Escolhe um perfil para simular o login.</p>
-
-            <div style="margin-top:20px;">
-              <label for="loginUserSelect">Utilizador</label>
-              <select id="loginUserSelect">
-                ${state.users.map(user => {
-                  const club = user.clubId ? getClubById(user.clubId) : null;
-                  const extra = club ? ` — ${club.name}` : " — Administração geral";
-                  return `<option value="${user.id}">${escapeHtml(user.name)} (${user.role})${escapeHtml(extra)}</option>`;
-                }).join("")}
-              </select>
-            </div>
-
-            <div class="actions" style="margin-top:16px;">
-              <button class="btn primary" id="loginBtn">Entrar</button>
-            </div>
-
-            <div class="sidebar-box" style="margin-top:22px;">
-              <strong>Sem servidor local</strong>
-              <div class="small">Os dados foram embutidos no próprio HTML para funcionar em PC público.</div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      document.getElementById("loginBtn").addEventListener("click", () => {
-        login(document.getElementById("loginUserSelect").value);
-      });
-    }
-
-    function renderApp() {
-      const loginShell = document.getElementById("loginShell");
-      const appShell = document.getElementById("appShell");
-      loginShell.classList.add("hidden");
-      appShell.classList.remove("hidden");
-
-      const user = getCurrentUser();
-      const club = getCurrentClub();
-      const pendingApprovals = getPendingApprovalsForUser().length;
-      const myPending = club ? getClubPendingMatches(club.id).length : 0;
-
-      appShell.innerHTML = `
-        <aside class="sidebar">
-          <div class="brand">
-            Manager Mode EAFC
-            <small>Carreira centralizada, com visão por clube e administração separada.</small>
-          </div>
-
-          <div class="user-pill">
-            <strong>${escapeHtml(user.name)}</strong>
-            <div class="small" style="margin-top:6px;">Papel: ${user.role === "admin" ? "Administrador" : "Manager"}</div>
-            <div class="small" style="margin-top:4px;">Clube: ${club ? escapeHtml(club.name) : "Administração geral"}</div>
-          </div>
-
-          <nav class="nav">
-            <button class="nav-btn ${state.currentTab === "meu-clube" ? "active" : ""}" data-tab="meu-clube">Meu Clube</button>
-            <button class="nav-btn ${state.currentTab === "partidas" ? "active" : ""}" data-tab="partidas">Partidas</button>
-            <button class="nav-btn ${state.currentTab === "liga" ? "active" : ""}" data-tab="liga">Liga</button>
-            <button class="nav-btn ${state.currentTab === "historico" ? "active" : ""}" data-tab="historico">Histórico</button>
-            <button class="nav-btn ${state.currentTab === "aprovacoes" ? "active" : ""}" data-tab="aprovacoes">Aprovações ${pendingApprovals ? `(${pendingApprovals})` : ""}</button>
-            ${isAdmin() ? `<button class="nav-btn ${state.currentTab === "administracao" ? "active" : ""}" data-tab="administracao">Administração</button>` : ""}
-          </nav>
-
-          <div class="sidebar-box">
-            <h4>Resumo rápido</h4>
-            <div class="small">Pendentes para aprovar: ${pendingApprovals}</div>
-            <div class="small">Resultados do teu clube pendentes: ${myPending}</div>
-            <div class="small">Temporada: ${escapeHtml(state.league.season)}</div>
-            <div class="small">Liga: ${escapeHtml(state.league.name)}</div>
-          </div>
-
-          <div class="sidebar-box">
-            <h4>Acções</h4>
-            <div class="actions" style="margin-top:12px;">
-              <button class="btn" id="sidebarLogoutBtn">Sair</button>
-            </div>
-          </div>
-        </aside>
-
-        <main class="main">
-          ${renderTopBar()}
-          ${renderMeuClubeTab()}
-          ${renderPartidasTab()}
-          ${renderLigaTab()}
-          ${renderHistoricoTab()}
-          ${renderAprovacoesTab()}
-          ${isAdmin() ? renderAdminTab() : ""}
-        </main>
-      `;
-
-      attachAppEvents();
-    }
-
-    function renderTopBar() {
-      const user = getCurrentUser();
-      const club = getCurrentClub();
-      const pendingApprovals = getPendingApprovalsForUser();
-      const table = buildLeagueTable();
-      const clubRow = club ? table.find(row => row.clubId === club.id) : null;
-      const nextMatch = club ? getClubNextMatch(club.id) : null;
-
-      return `
-        <div class="sticky-topbar">
-          <div class="identity-row">
-            <div class="identity-chip"><div class="small">Utilizador</div><strong>${escapeHtml(user.name)}</strong></div>
-            <div class="identity-chip"><div class="small">Papel</div><strong>${user.role === "admin" ? "Administrador" : "Manager"}</strong></div>
-            <div class="identity-chip"><div class="small">Clube</div><strong>${club ? escapeHtml(club.name) : "Geral"}</strong></div>
-            <div class="identity-chip"><div class="small">Temporada</div><strong>${escapeHtml(state.league.season)}</strong></div>
-            <div class="identity-chip"><div class="small">Posição</div><strong>${clubRow ? `${clubRow.position}º` : "-"}</strong></div>
-            <div class="identity-chip"><div class="small">Pendências</div><strong>${pendingApprovals.length}</strong></div>
-          </div>
-
-          <div class="identity-row">
-            <div class="identity-chip">
-              <div class="small">Próximo jogo</div>
-              <strong>${nextMatch ? escapeHtml(formatMatchLabel(nextMatch)) : "Sem agendamento"}</strong>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderMeuClubeTab() {
-      const club = getCurrentClub();
-
-      if (!club && isAdmin()) {
-        const table = buildLeagueTable();
-        const pending = state.matches.filter(match => match.status === "pending").length;
-        const scheduled = state.matches.filter(match => match.status === "scheduled").length;
-        return `
-          <section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}">
-            <div class="breadcrumbs">Início > Meu Clube</div>
-            <div class="page-header"><div><h2>Painel geral do administrador</h2></div></div>
-            <div class="grid grid-4">
-              <div class="card"><h3>Clubes</h3><strong>${state.clubs.length}</strong></div>
-              <div class="card"><h3>Managers</h3><strong>${state.users.filter(u => u.role === "manager").length}</strong></div>
-              <div class="card"><h3>Pendentes</h3><strong>${pending}</strong></div>
-              <div class="card"><h3>Agendadas</h3><strong>${scheduled}</strong></div>
-            </div>
-            <div class="card" style="margin-top:18px;">
-              <h3>Tabela da liga</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>Pos</th><th>Clube</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
-                  <tbody>
-                    ${table.map(row => `
-                      <tr>
-                        <td>${row.position}</td>
-                        <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
-                        <td>${row.points}</td>
-                        <td>${row.played}</td>
-                        <td>${row.wins}</td>
-                        <td>${row.draws}</td>
-                        <td>${row.losses}</td>
-                        <td>${row.gf}</td>
-                        <td>${row.ga}</td>
-                        <td>${row.gd}</td>
-                      </tr>
-                    `).join("")}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-        `;
-      }
-
-      if (!club) {
-        return `<section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}"><div class="empty">Não foi possível localizar o clube do utilizador actual.</div></section>`;
-      }
-
-      const nextMatch = getClubNextMatch(club.id);
-      const fullTable = buildLeagueTable();
-      const stats = getClubStatsFromMatches(club.id);
-      const topScorer = getTopScorer(club.id);
-      const topAssist = getTopAssist(club.id);
-      const mostBooked = getMostBooked(club.id);
-      const playerStats = getClubPlayerStats(club.id);
-
-      return `
-        <section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Meu Clube</div>
-
-          <div class="hero">
-            <div class="card">
-              <div class="hero-club">
-                <div class="club-logo">
-                  ${getClubLogoUrl(club) ? `<img src="${escapeHtml(getClubLogoUrl(club))}" alt="${escapeHtml(club.name)}" />` : `<span>Sem escudo</span>`}
-                </div>
-                <div style="min-width:0;">
-                  <div class="hero-title">
-                    <h1>${escapeHtml(club.name)}</h1>
-                    <span class="chip">${escapeHtml(club.shortName || "")}</span>
-                    <span class="chip">${escapeHtml(club.league || "")}</span>
-                  </div>
-                  <div class="small">Manager: ${escapeHtml(club.manager)}</div>
-                  <div class="small" style="margin-top:4px;">Estádio: ${escapeHtml(club.stadium || "Sem estádio")}</div>
-                  <div style="margin-top:14px;" class="muted">${escapeHtml(getClubNarrative(club.id))}</div>
-                </div>
-              </div>
-
-              <div class="section-divider"></div>
-
-              <div class="stat-blocks">
-                <div class="stat-box"><span class="label">Jogos</span><strong>${stats.played}</strong></div>
-                <div class="stat-box"><span class="label">Pontos</span><strong>${stats.points}</strong></div>
-                <div class="stat-box"><span class="label">Golos marcados</span><strong>${stats.gf}</strong></div>
-                <div class="stat-box"><span class="label">Golos sofridos</span><strong>${stats.ga}</strong></div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-row">
-                <h3>Próximo jogo</h3>
-                <span class="badge">Prioridade</span>
-              </div>
-              ${
-                nextMatch ? `
-                  <div style="font-size:1.2rem;font-weight:700;">${escapeHtml(formatMatchLabel(nextMatch))}</div>
-                  <div class="small" style="margin-top:8px;">Ronda ${nextMatch.round}</div>
-                  <div class="small" style="margin-top:4px;">Data: ${escapeHtml(nextMatch.date)}</div>
-                  <div class="small" style="margin-top:4px;">Estado: Agendado</div>
-                  <div class="actions" style="margin-top:16px;">
-                    <button class="btn primary quick-open-match" data-match-id="${nextMatch.id}">Registar partida</button>
-                  </div>
-                ` : `<div class="empty">Não há próximo jogo agendado para este clube.</div>`
-              }
-            </div>
-          </div>
-
-          <div class="grid grid-2">
-            <div class="card">
-              <h3>Estatísticas do elenco</h3>
-              <div class="list">
-                <div class="list-item"><strong>Melhor marcador</strong><br><span class="small">${topScorer ? `${escapeHtml(topScorer.name)} • ${topScorer.goals} golo(s)` : "Sem dados"}</span></div>
-                <div class="list-item"><strong>Melhor assistente</strong><br><span class="small">${topAssist ? `${escapeHtml(topAssist.name)} • ${topAssist.assists} assistência(s)` : "Sem dados"}</span></div>
-                <div class="list-item"><strong>Mais advertido</strong><br><span class="small">${mostBooked ? `${escapeHtml(mostBooked.name)} • ${mostBooked.yellow} amarelo(s), ${mostBooked.red} vermelho(s)` : "Sem dados"}</span></div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-row">
-                <h3>Resumo do elenco</h3>
-                <span class="badge">Tudo num só lugar</span>
-              </div>
-              <div class="small" style="line-height:1.7;">${escapeHtml(club.summary || "Sem resumo registado para este clube.")}</div>
-              <div class="section-divider"></div>
-              <div class="small">Plantel base</div>
-              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-                ${getSortedSquadList(club.id).map(player => `<span class="chip">${escapeHtml(player.name)}</span>`).join("")}
-              </div>
-              <div class="section-divider"></div>
-              <div class="small" style="margin-bottom:12px;">Produção do elenco • Golos, assistências e cartões</div>
-              ${
-                playerStats.length ? `
-                  <div class="table-wrap">
-                    <table>
-                      <thead><tr><th>Jogador</th><th>G</th><th>A</th><th>CA</th><th>CV</th></tr></thead>
-                      <tbody>
-                        ${playerStats.map(player => `
-                          <tr>
-                            <td>${escapeHtml(player.name)}</td>
-                            <td>${player.goals}</td>
-                            <td>${player.assists}</td>
-                            <td>${player.yellow}</td>
-                            <td>${player.red}</td>
-                          </tr>
-                        `).join("")}
-                      </tbody>
-                    </table>
-                  </div>
-                ` : `<div class="empty">Ainda não há produção do elenco disponível.</div>`
-              }
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:18px;">
-            <h3>Tabela completa</h3>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Pos</th><th>Clube</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
-                <tbody>
-                  ${fullTable.map(row => `
-                    <tr ${row.clubId === club.id ? 'style="background:rgba(56,189,248,0.12);"' : ""}>
-                      <td>${row.position}</td>
-                      <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
-                      <td>${row.points}</td>
-                      <td>${row.played}</td>
-                      <td>${row.wins}</td>
-                      <td>${row.draws}</td>
-                      <td>${row.losses}</td>
-                      <td>${row.gf}</td>
-                      <td>${row.ga}</td>
-                      <td>${row.gd}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderPlayerSelectOptions(clubId) {
-      return getSortedSquadList(clubId).map(player => `<option value="${escapeHtml(player.name)}">${escapeHtml(player.name)}</option>`).join("");
-    }
-
-    function renderGoalRows(match, teamSide) {
-      const isHome = teamSide === "home";
-      const clubId = isHome ? match.homeClubId : match.awayClubId;
-      const club = getClubById(clubId);
-      const goalCount = Number(isHome ? match.homeGoals : match.awayGoals) || 0;
-      const goalEvents = match.events.filter(e => e.teamSide === teamSide && e.type === "goal");
-
-      return `
-        <div class="section-divider"></div>
-        <h3>${escapeHtml(club.name)} • Golos</h3>
-        <div class="event-grid">
-          ${Array.from({ length: goalCount }, (_, index) => {
-            return `
-              <div class="event-row">
-                <div>
-                  <label>Marcador</label>
-                  <select class="event-player" data-kind="goal-player" data-team="${teamSide}" data-index="${index}">
-                    <option value="">Escolher jogador</option>
-                    ${renderPlayerSelectOptions(clubId)}
-                  </select>
-                </div>
-                <div>
-                  <label>Assistência</label>
-                  <select class="event-assist" data-kind="goal-assist" data-team="${teamSide}" data-index="${index}">
-                    <option value="">Sem assistência</option>
-                    ${renderPlayerSelectOptions(clubId)}
-                  </select>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
-    }
-
-    function renderCardRows(match, teamSide, type, label) {
-      const isHome = teamSide === "home";
-      const clubId = isHome ? match.homeClubId : match.awayClubId;
-      const club = getClubById(clubId);
-      const cardEvents = match.events.filter(e => e.teamSide === teamSide && e.type === type);
-
-      return `
-        <div class="section-divider"></div>
-        <div class="card-row">
-          <h3>${escapeHtml(club.name)} • ${label}</h3>
-          <button class="btn add-card-row" data-team="${teamSide}" data-type="${type}">Adicionar</button>
-        </div>
-        <div class="event-grid" id="card-wrap-${teamSide}-${type}">
-          ${cardEvents.map((event, index) => `
-            <div class="event-row">
-              <div>
-                <label>Jogador</label>
-                <select class="card-player" data-team="${teamSide}" data-type="${type}" data-index="${index}">
-                  <option value="">Escolher jogador</option>
-                  ${renderPlayerSelectOptions(clubId)}
-                </select>
-              </div>
-              <div class="actions" style="align-items:end;">
-                <button class="btn danger remove-card-row" data-team="${teamSide}" data-type="${type}" data-index="${index}">Remover</button>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function renderMatchForm(match) {
-      const home = getClubById(match.homeClubId);
-      const away = getClubById(match.awayClubId);
-      const canSubmit = canSubmitMatch(match.homeClubId, match.awayClubId);
-      const locked = !canSubmit || match.status === "approved";
-
-      return `
-        <div>
-          <div class="list-item" style="margin-bottom:16px;">
-            <strong>${escapeHtml(home.name)} vs ${escapeHtml(away.name)}</strong>
-            <div class="small" style="margin-top:6px;">Ronda ${match.round} • ${escapeHtml(match.date)}</div>
-            <div class="small" style="margin-top:4px;">Estado actual: ${match.status === "approved" ? "Aprovado" : match.status === "pending" ? "Pendente de aprovação" : "Agendado"}</div>
-          </div>
-
-          ${
-            locked && match.status === "approved"
-              ? `<div class="empty" style="margin-bottom:16px;">Esta partida já foi aprovada e está bloqueada para edição directa.</div>`
-              : !canSubmit
-                ? `<div class="empty" style="margin-bottom:16px;">Tu não tens permissão para enviar o resultado desta partida.</div>`
-                : ""
-          }
-
-          <div class="form-grid">
-            <div>
-              <label for="matchHomeGoals">Golos ${escapeHtml(home.name)}</label>
-              <input id="matchHomeGoals" type="number" min="0" value="${match.homeGoals === "" ? "" : match.homeGoals}" ${locked ? "disabled" : ""} />
-            </div>
-            <div>
-              <label for="matchAwayGoals">Golos ${escapeHtml(away.name)}</label>
-              <input id="matchAwayGoals" type="number" min="0" value="${match.awayGoals === "" ? "" : match.awayGoals}" ${locked ? "disabled" : ""} />
-            </div>
-          </div>
-
-          ${renderGoalRows(match, "home")}
-          ${renderGoalRows(match, "away")}
-          ${renderCardRows(match, "home", "yellow", "Cartões amarelos")}
-          ${renderCardRows(match, "away", "yellow", "Cartões amarelos")}
-          ${renderCardRows(match, "home", "red", "Cartões vermelhos")}
-          ${renderCardRows(match, "away", "red", "Cartões vermelhos")}
-
-          <div class="section-divider"></div>
-
-          <div class="form-grid">
-            <div>
-              <label for="matchEvidenceFile">Foto da evidência</label>
-              <input id="matchEvidenceFile" type="file" accept="image/*" ${locked ? "disabled" : ""} />
-              <div class="small" style="margin-top:8px;">A imagem fica guardada neste navegador/PC, sem depender de link externo.</div>
-              ${renderEvidencePreview(match)}
-            </div>
-            <div>
-              <label for="matchDateInput">Data</label>
-              <input id="matchDateInput" type="date" value="${escapeHtml(match.date || "")}" ${locked ? "disabled" : ""} />
-            </div>
-          </div>
-
-          <div style="margin-top:16px;">
-            <label for="matchNotes">Observações</label>
-            <textarea id="matchNotes" ${locked ? "disabled" : ""}>${escapeHtml(match.notes || "")}</textarea>
-          </div>
-
-          <div class="actions" style="margin-top:16px;">
-            ${!locked ? `<button class="btn success" id="saveMatchBtn" data-match-id="${match.id}">Enviar para aprovação</button>` : ""}
-            ${!locked ? `<button class="btn warning" id="saveDraftBtn" data-match-id="${match.id}">Guardar rascunho</button>` : ""}
-          </div>
-
-          <div class="section-divider"></div>
-          <h3>Auditoria</h3>
-          ${
-            match.audit.length ? `
-              <div class="list">
-                ${match.audit.map(item => `
-                  <div class="list-item">
-                    <strong>${escapeHtml(item.by)}</strong>
-                    <div class="small" style="margin-top:4px;">${escapeHtml(item.at)}</div>
-                    <div class="small" style="margin-top:8px;color:var(--text);">${escapeHtml(item.action)}</div>
-                  </div>
-                `).join("")}
-              </div>
-            ` : `<div class="empty">Sem registos de auditoria.</div>`
-          }
-        </div>
-      `;
-    }
-
-    function renderPartidasTab() {
-      const club = getCurrentClub();
-      const visibleMatches = isAdmin()
-        ? [...state.matches].sort((a, b) => String(b.date).localeCompare(String(a.date)))
-        : club
-          ? getClubAllMatches(club.id).sort((a, b) => String(b.date).localeCompare(String(a.date)))
-          : [];
-
-      const formMatch = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
-      const availableMatches = isAdmin()
-        ? state.matches
-        : state.matches.filter(match => club && (match.homeClubId === club.id || match.awayClubId === club.id));
-
-      return `
-        <section class="tab ${state.currentTab === "partidas" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Partidas</div>
-          <div class="page-header">
-            <div>
-              <h2>Registar partida</h2>
-              <p class="muted">Fluxo completo para enviar resultado e detalhes para aprovação.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-2">
-            <div class="card">
-              <h3>Seleccionar partida</h3>
-              <div style="margin-bottom:16px;">
-                <label for="matchSelect">Partida</label>
-                <select id="matchSelect">
-                  <option value="">Escolhe uma partida</option>
-                  ${availableMatches.map(match => `
-                    <option value="${match.id}" ${state.selectedMatchId === match.id ? "selected" : ""}>
-                      ${escapeHtml(formatMatchLabel(match))} — Ronda ${match.round}
-                    </option>
-                  `).join("")}
-                </select>
-              </div>
-
-              ${formMatch ? renderMatchForm(formMatch) : `<div class="empty">Escolhe uma partida para abrir o formulário completo.</div>`}
-            </div>
-
-            <div class="card">
-              <div class="card-row">
-                <h3>Partidas visíveis</h3>
-                <span class="badge">${isAdmin() ? "Admin" : "Meu clube"}</span>
-              </div>
-
-              ${
-                visibleMatches.length ? `
-                  <div class="list">
-                    ${visibleMatches.map(match => {
-                      const home = getClubById(match.homeClubId);
-                      const away = getClubById(match.awayClubId);
-                      const score = match.homeGoals !== "" && match.awayGoals !== "" ? ` • ${match.homeGoals} x ${match.awayGoals}` : "";
-                      const pillClass = match.status === "approved" ? "approved" : match.status === "pending" ? "pending" : "";
-                      const label = match.status === "approved" ? "Aprovado" : match.status === "pending" ? "Pendente" : "Agendado";
-                      return `
-                        <div class="list-item">
-                          <strong>${escapeHtml(home.name)} vs ${escapeHtml(away.name)}</strong>${score}
-                          <br>
-                          <span class="small">Ronda ${match.round} • ${escapeHtml(match.date)}</span>
-                          <div style="margin-top:10px;"><span class="pill ${pillClass}">${label}</span></div>
-                          <div class="actions" style="margin-top:12px;">
-                            ${(isAdmin() || canSubmitMatch(match.homeClubId, match.awayClubId)) ? `<button class="btn quick-open-match" data-match-id="${match.id}">Abrir</button>` : ""}
-                          </div>
-                        </div>
-                      `;
-                    }).join("")}
-                  </div>
-                ` : `<div class="empty">Nenhuma partida disponível para este utilizador.</div>`
-              }
-            </div>
-          </div>
-        </section>
-      `;
-    }
-
-
-    function renderLigaTab() {
-      const club = getCurrentClub();
-      const table = buildLeagueTable();
-      const rounds = getMatchesGroupedByRound();
-      const topScorers = getLeagueTopScorers(12);
-      const mostBooked = getLeagueMostBooked(12);
-
-      return `
-        <section class="tab ${state.currentTab === "liga" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Liga</div>
-          <div class="page-header">
-            <div>
-              <h2>Liga</h2>
-              <p class="muted">Classificação completa, jogos por ronda e destaques estatísticos da competição.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-2">
-            <div class="card">
-              <h3>Classificação completa</h3>
-              <div class="table-wrap" style="margin-top:12px;">
-                <table>
-                  <thead><tr><th>Pos</th><th>Clube</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
-                  <tbody>
-                    ${table.map(row => `
-                      <tr ${club && row.clubId === club.id ? 'style="background:rgba(56,189,248,0.12);"' : ""}>
-                        <td>${row.position}</td>
-                        <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
-                        <td>${row.points}</td>
-                        <td>${row.played}</td>
-                        <td>${row.wins}</td>
-                        <td>${row.draws}</td>
-                        <td>${row.losses}</td>
-                        <td>${row.gf}</td>
-                        <td>${row.ga}</td>
-                        <td>${row.gd}</td>
-                      </tr>
-                    `).join("")}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Artilharia</h3>
-              ${
-                topScorers.length ? `
-                  <div class="table-wrap" style="margin-top:12px;">
-                    <table>
-                      <thead><tr><th>Jogador</th><th>Clube</th><th>G</th><th>A</th></tr></thead>
-                      <tbody>
-                        ${topScorers.map(item => `
-                          <tr>
-                            <td>${escapeHtml(item.playerName)}</td>
-                            <td>${renderClubCell(item.clubName, getClubLogoUrl(getClubById(item.clubId)))}</td>
-                            <td>${item.goals}</td>
-                            <td>${item.assists}</td>
-                          </tr>
-                        `).join("")}
-                      </tbody>
-                    </table>
-                  </div>
-                ` : `<div class="empty" style="margin-top:12px;">Ainda não há golos aprovados na liga.</div>`
-              }
-
-              <div class="section-divider"></div>
-
-              <h3>Cartões</h3>
-              ${
-                mostBooked.length ? `
-                  <div class="table-wrap" style="margin-top:12px;">
-                    <table>
-                      <thead><tr><th>Jogador</th><th>Clube</th><th>CA</th><th>CV</th></tr></thead>
-                      <tbody>
-                        ${mostBooked.map(item => `
-                          <tr>
-                            <td>${escapeHtml(item.playerName)}</td>
-                            <td>${renderClubCell(item.clubName, getClubLogoUrl(getClubById(item.clubId)))}</td>
-                            <td>${item.yellow}</td>
-                            <td>${item.red}</td>
-                          </tr>
-                        `).join("")}
-                      </tbody>
-                    </table>
-                  </div>
-                ` : `<div class="empty" style="margin-top:12px;">Ainda não há cartões aprovados na liga.</div>`
-              }
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:18px;">
-            <h3>Jogos por ronda</h3>
-            ${
-              rounds.length ? `
-                <div class="list" style="margin-top:12px;">
-                  ${rounds.map(group => `
-                    <div class="list-item">
-                      <strong>Ronda ${group.round}</strong>
-                      <div class="table-wrap" style="margin-top:12px;">
-                        <table>
-                          <thead><tr><th>Jogo</th><th>Resultado</th><th>Estado</th><th>Cartões</th><th>Data</th></tr></thead>
-                          <tbody>
-                            ${group.matches.map(match => {
-                              const home = getClubById(match.homeClubId);
-                              const away = getClubById(match.awayClubId);
-                              const result = match.homeGoals !== "" && match.awayGoals !== "" ? `${match.homeGoals} x ${match.awayGoals}` : "—";
-                              const homeY = match.events.filter(e => e.teamSide === "home" && e.type === "yellow").length;
-                              const awayY = match.events.filter(e => e.teamSide === "away" && e.type === "yellow").length;
-                              const homeR = match.events.filter(e => e.teamSide === "home" && e.type === "red").length;
-                              const awayR = match.events.filter(e => e.teamSide === "away" && e.type === "red").length;
-                              const cardsLabel = `${home.name}: ${homeY} CA / ${homeR} CV • ${away.name}: ${awayY} CA / ${awayR} CV`;
-                              const statusLabel = match.status === "approved" ? "Aprovado" : match.status === "pending" ? "Pendente" : "Agendado";
-                              return `
-                                <tr>
-                                  <td>${renderClubCell(home.name, getClubLogoUrl(home))} <span class="small">vs</span> ${renderClubCell(away.name, getClubLogoUrl(away))}</td>
-                                  <td>${result}</td>
-                                  <td>${statusLabel}</td>
-                                  <td>${escapeHtml(cardsLabel)}</td>
-                                  <td>${escapeHtml(match.date)}</td>
-                                </tr>
-                              `;
-                            }).join("")}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  `).join("")}
-                </div>
-              ` : `<div class="empty">Ainda não há jogos registados na liga.</div>`
-            }
-          </div>
-        </section>
-      `;
-    }
-
-    function renderHistoricoTab() {
-      const club = getCurrentClub();
-      const matches = isAdmin()
-        ? [...state.matches].sort((a, b) => String(b.date).localeCompare(String(a.date)))
-        : club
-          ? getClubAllMatches(club.id).sort((a, b) => String(b.date).localeCompare(String(a.date)))
-          : [];
-
-      return `
-        <section class="tab ${state.currentTab === "historico" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Histórico</div>
-          <div class="page-header">
-            <div>
-              <h2>Histórico completo</h2>
-              <p class="muted">Consulta partidas, evidências, estado e detalhes registados.</p>
-            </div>
-          </div>
-
-          <div class="card">
-            ${
-              matches.length ? `
-                <div class="list">
-                  ${matches.map(match => {
-                    const home = getClubById(match.homeClubId);
-                    const away = getClubById(match.awayClubId);
-                    const score = match.homeGoals !== "" && match.awayGoals !== "" ? `${match.homeGoals} x ${match.awayGoals}` : "Sem resultado";
-                    const label = match.status === "approved" ? "Aprovado" : match.status === "pending" ? "Pendente" : "Agendado";
-                    const cls = match.status === "approved" ? "approved" : match.status === "pending" ? "pending" : "";
-                    return `
-                      <div class="list-item">
-                        <div class="card-row">
-                          <div>
-                            <strong>${escapeHtml(home.name)} vs ${escapeHtml(away.name)}</strong>
-                            <div class="small" style="margin-top:6px;">Ronda ${match.round} • ${escapeHtml(match.date)}</div>
-                          </div>
-                          <div><span class="pill ${cls}">${label}</span></div>
-                        </div>
-
-                        <div style="margin-top:12px;font-size:1.1rem;font-weight:700;">${escapeHtml(score)}</div>
-                        <div class="small" style="margin-top:10px;line-height:1.7;">${match.notes ? escapeHtml(match.notes) : "Sem observações."}</div>
-
-                        ${renderEvidencePreview(match)}
-
-                        <div class="actions" style="margin-top:14px;">
-                          <button class="btn quick-open-match" data-match-id="${match.id}">Abrir detalhes</button>
-                        </div>
-                      </div>
-                    `;
-                  }).join("")}
-                </div>
-              ` : `<div class="empty">Ainda não há histórico disponível.</div>`
-            }
-          </div>
-        </section>
-      `;
-    }
-
-    function renderAprovacoesTab() {
-      const approvals = getPendingApprovalsForUser();
-
-      return `
-        <section class="tab ${state.currentTab === "aprovacoes" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Aprovações</div>
-          <div class="page-header">
-            <div>
-              <h2>Aprovações pendentes</h2>
-              <p class="muted">Confirma os resultados enviados por outros managers.</p>
-            </div>
-          </div>
-
-          <div class="card">
-            ${
-              approvals.length ? `
-                <div class="list">
-                  ${approvals.map(match => {
-                    const home = getClubById(match.homeClubId);
-                    const away = getClubById(match.awayClubId);
-                    return `
-                      <div class="list-item">
-                        <strong>${escapeHtml(home.name)} ${match.homeGoals} x ${match.awayGoals} ${escapeHtml(away.name)}</strong>
-                        <div class="small" style="margin-top:6px;">Ronda ${match.round} • ${escapeHtml(match.date)}</div>
-                        <div class="small" style="margin-top:8px;color:var(--text);">${escapeHtml(match.notes || "Sem observações.")}</div>
-                        ${renderEvidencePreview(match)}
-                        <div class="actions" style="margin-top:14px;">
-                          <button class="btn success approve-match" data-match-id="${match.id}">Aprovar</button>
-                          <button class="btn danger reject-match" data-match-id="${match.id}">Rejeitar</button>
-                          <button class="btn quick-open-match" data-match-id="${match.id}">Abrir</button>
-                        </div>
-                      </div>
-                    `;
-                  }).join("")}
-                </div>
-              ` : `<div class="empty">Não há aprovações pendentes para este utilizador.</div>`
-            }
-          </div>
-        </section>
-      `;
-    }
-
-    function renderAdminTab() {
-      const table = buildLeagueTable();
-      return `
-        <section class="tab ${state.currentTab === "administracao" ? "active" : ""}">
-          <div class="breadcrumbs">Início > Administração</div>
-          <div class="page-header">
-            <div>
-              <h2>Administração</h2>
-              <p class="muted">Visão geral da liga, clubes, utilizadores e partidas.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-4">
-            <div class="card"><h3>Clubes</h3><strong>${state.clubs.length}</strong></div>
-            <div class="card"><h3>Jogadores globais</h3><strong>${state.players.length}</strong></div>
-            <div class="card"><h3>Partidas</h3><strong>${state.matches.length}</strong></div>
-            <div class="card"><h3>Managers</h3><strong>${state.users.filter(u => u.role === "manager").length}</strong></div>
-          </div>
-
-          <div class="card" style="margin-top:18px;">
-            <h3>Tabela completa</h3>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Pos</th><th>Clube</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
-                <tbody>
-                  ${table.map(row => `
-                    <tr>
-                      <td>${row.position}</td>
-                      <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
-                      <td>${row.points}</td>
-                      <td>${row.played}</td>
-                      <td>${row.wins}</td>
-                      <td>${row.draws}</td>
-                      <td>${row.losses}</td>
-                      <td>${row.gf}</td>
-                      <td>${row.ga}</td>
-                      <td>${row.gd}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      `;
-    }
-
-    function attachAppEvents() {
-      document.querySelectorAll(".nav-btn").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-      });
-
-      const logoutBtn = document.getElementById("sidebarLogoutBtn");
-      if (logoutBtn) logoutBtn.addEventListener("click", logout);
-
-      const matchSelect = document.getElementById("matchSelect");
-      if (matchSelect) {
-        matchSelect.addEventListener("change", (e) => {
-          state.selectedMatchId = e.target.value ? Number(e.target.value) : null;
-          saveUiState();
-          render();
-        });
-      }
-
-      document.querySelectorAll(".quick-open-match").forEach(btn => {
-        btn.addEventListener("click", () => openMatch(btn.dataset.matchId));
-      });
-
-      document.querySelectorAll(".approve-match").forEach(btn => {
-        btn.addEventListener("click", () => approveMatch(Number(btn.dataset.matchId)));
-      });
-
-      document.querySelectorAll(".reject-match").forEach(btn => {
-        btn.addEventListener("click", () => rejectMatch(Number(btn.dataset.matchId)));
-      });
-
-      const evidenceFileInput = document.getElementById("matchEvidenceFile");
-      if (evidenceFileInput) {
-        evidenceFileInput.addEventListener("change", () => {
-          const file = evidenceFileInput.files?.[0];
-          if (!file) {
-            delete evidenceFileInput.dataset.imageData;
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = () => {
-            evidenceFileInput.dataset.imageData = typeof reader.result === "string" ? reader.result : "";
-            const match = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
-            if (match && evidenceFileInput.dataset.imageData) {
-              match.evidenceImage = evidenceFileInput.dataset.imageData;
-              saveAllToLocalSnapshot();
-              render();
-              toast("Foto da evidência carregada.");
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const saveMatchBtn = document.getElementById("saveMatchBtn");
-      if (saveMatchBtn) {
-        saveMatchBtn.addEventListener("click", () => saveMatch(Number(saveMatchBtn.dataset.matchId), "pending"));
-      }
-
-      const saveDraftBtn = document.getElementById("saveDraftBtn");
-      if (saveDraftBtn) {
-        saveDraftBtn.addEventListener("click", () => saveMatch(Number(saveDraftBtn.dataset.matchId), "scheduled"));
-      }
-
-      document.querySelectorAll(".add-card-row").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const match = getMatchById(state.selectedMatchId);
-          if (!match) return;
-          match.events.push({
-            teamSide: btn.dataset.team,
-            type: btn.dataset.type,
-            player: "",
-            assist: ""
-          });
-          render();
-        });
-      });
-
-      document.querySelectorAll(".remove-card-row").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const match = getMatchById(state.selectedMatchId);
-          if (!match) return;
-          const filtered = [];
-          let currentIndex = 0;
-          match.events.forEach(e => {
-            if (e.teamSide === btn.dataset.team && e.type === btn.dataset.type) {
-              if (currentIndex !== Number(btn.dataset.index)) filtered.push(e);
-              currentIndex++;
-            } else {
-              filtered.push(e);
-            }
-          });
-          match.events = filtered;
-          render();
-        });
-      });
-
-      setTimeout(() => {
-        const match = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
-        if (!match) return;
-
-        const goalEvents = match.events.filter(e => e.type === "goal");
-        goalEvents.forEach((event, i) => {
-          const teamEvents = goalEvents.filter(x => x.teamSide === event.teamSide);
-          const index = teamEvents.findIndex((x, idx) => idx >= 0 && x === event);
-          const playerEl = document.querySelector(`[data-kind="goal-player"][data-team="${event.teamSide}"][data-index="${index}"]`);
-          const assistEl = document.querySelector(`[data-kind="goal-assist"][data-team="${event.teamSide}"][data-index="${index}"]`);
-          if (playerEl) playerEl.value = event.player || "";
-          if (assistEl) assistEl.value = event.assist || "";
-        });
-
-        ["home", "away"].forEach(team => {
-          ["yellow", "red"].forEach(type => {
-            const events = match.events.filter(e => e.teamSide === team && e.type === type);
-            events.forEach((event, index) => {
-              const el = document.querySelector(`.card-player[data-team="${team}"][data-type="${type}"][data-index="${index}"]`);
-              if (el) el.value = event.player || "";
-            });
-          });
-        });
-      }, 0);
-    }
-
-    function collectFormEvents(match) {
-      const events = [];
-
-      const homeGoals = Number(document.getElementById("matchHomeGoals")?.value || 0);
-      const awayGoals = Number(document.getElementById("matchAwayGoals")?.value || 0);
-
-      for (let i = 0; i < homeGoals; i++) {
-        const player = document.querySelector(`[data-kind="goal-player"][data-team="home"][data-index="${i}"]`)?.value || "";
-        const assist = document.querySelector(`[data-kind="goal-assist"][data-team="home"][data-index="${i}"]`)?.value || "";
-        if (player) events.push({ teamSide: "home", type: "goal", player, assist });
-      }
-
-      for (let i = 0; i < awayGoals; i++) {
-        const player = document.querySelector(`[data-kind="goal-player"][data-team="away"][data-index="${i}"]`)?.value || "";
-        const assist = document.querySelector(`[data-kind="goal-assist"][data-team="away"][data-index="${i}"]`)?.value || "";
-        if (player) events.push({ teamSide: "away", type: "goal", player, assist });
-      }
-
-      document.querySelectorAll(".card-player").forEach(el => {
-        if (el.value) {
-          events.push({
-            teamSide: el.dataset.team,
-            type: el.dataset.type,
-            player: el.value,
-            assist: ""
-          });
-        }
-      });
-
-      return events;
-    }
-
-    function saveMatch(matchId, targetStatus) {
-      const match = getMatchById(matchId);
-      const user = getCurrentUser();
-      if (!match || !user) return;
-
-      match.homeGoals = Number(document.getElementById("matchHomeGoals")?.value || 0);
-      match.awayGoals = Number(document.getElementById("matchAwayGoals")?.value || 0);
-      match.date = document.getElementById("matchDateInput")?.value || match.date;
-      const evidenceFileInput = document.getElementById("matchEvidenceFile");
-      if (evidenceFileInput?.dataset.imageData) match.evidenceImage = evidenceFileInput.dataset.imageData;
-      match.notes = document.getElementById("matchNotes")?.value || "";
-      match.events = collectFormEvents(match);
-
-      if (targetStatus === "pending") {
-        match.status = "pending";
-        match.submittedByUserId = user.id;
-        match.approvedByUserId = null;
-        match.audit.push({
-          at: nowStamp(),
-          by: user.name,
-          action: "Resultado enviado para aprovação"
-        });
-        toast("Resultado enviado para aprovação.");
-      } else {
-        match.status = "scheduled";
-        match.audit.push({
-          at: nowStamp(),
-          by: user.name,
-          action: "Rascunho guardado"
-        });
-        toast("Rascunho guardado.", "warning");
-      }
-
-      saveAllToLocalSnapshot();
-      render();
-    }
-
-    function approveMatch(matchId) {
-      const match = getMatchById(matchId);
-      const user = getCurrentUser();
-      if (!match || !user || !canApproveMatch(match)) return;
-
-      match.status = "approved";
-      match.approvedByUserId = user.id;
-      match.audit.push({
-        at: nowStamp(),
-        by: user.name,
-        action: "Resultado aprovado"
-      });
-
-      saveAllToLocalSnapshot();
-      render();
-      toast("Partida aprovada com sucesso.");
-    }
-
-    function rejectMatch(matchId) {
-      const match = getMatchById(matchId);
-      const user = getCurrentUser();
-      if (!match || !user || !canApproveMatch(match)) return;
-
-      match.status = "scheduled";
-      match.approvedByUserId = null;
-      match.audit.push({
-        at: nowStamp(),
-        by: user.name,
-        action: "Resultado rejeitado e devolvido para edição"
-      });
-
-      saveAllToLocalSnapshot();
-      render();
-      toast("Partida rejeitada e devolvida.", "danger");
-    }
-
-    window.addEventListener("DOMContentLoaded", init);
-  </script>
-
-  
-
-  
-
-  
-
-  
-
-<script>
-const DATA_FILES = {
-  clubs: "./clubs.json",
-  matches: "./matches.json"
-};
-
-async function loadExternalData(){
-  const [clubs, matches] = await Promise.all([
-    fetch(DATA_FILES.clubs).then(r=>r.json()),
-    fetch(DATA_FILES.matches).then(r=>r.json())
-  ]);
-
-  return { clubs, matches };
+ <div id="loginShell" class="login-shell"></div>
+ <div id="appShell" class="app-shell hidden"></div>
+ <div id="toastWrap" class="toast-wrap"></div>
+
+
+ <script type="application/json" id="app-data-json">
+{
+ "league": {
+  "name": "Manager EAFC League",
+  "season": "Season 2026",
+  "championships": [
+   {
+    "id": 1,
+    "name": "Premier League",
+    "rounds": 18,
+    "format": "round robin"
+   }
+  ]
+ },
+ "users": [
+  {
+   "id": 1,
+   "name": "Administrator",
+   "role": "admin",
+   "clubId": null
+  },
+  {
+   "id": 2,
+   "name": "Diogo",
+   "role": "manager",
+   "clubId": 19
+  },
+  {
+   "id": 3,
+   "name": "Rodrigo",
+   "role": "manager",
+   "clubId": 15
+  },
+  {
+   "id": 4,
+   "name": "Braulio",
+   "role": "manager",
+   "clubId": 8
+  },
+  {
+   "id": 5,
+   "name": "Manager City",
+   "role": "manager",
+   "clubId": 9
+  },
+  {
+   "id": 6,
+   "name": "Coach",
+   "role": "manager",
+   "clubId": null
+  },
+  {
+   "id": 7,
+   "name": "Manager Tottenham",
+   "role": "manager",
+   "clubId": 6
+  },
+  {
+   "id": 8,
+   "name": "Manager United",
+   "role": "manager",
+   "clubId": 14
+  },
+  {
+   "id": 9,
+   "name": "Manager Newcastle",
+   "role": "manager",
+   "clubId": 20
+  },
+  {
+   "id": 10,
+   "name": "Manager Everton",
+   "role": "manager",
+   "clubId": 13
+  },
+  {
+   "id": 11,
+   "name": "Manager Burnley",
+   "role": "manager",
+   "clubId": 27
+  },
+  {
+   "id": 12,
+   "name": "Manager Chelsea",
+   "role": "manager",
+   "clubId": 18
+  }
+ ]
 }
-</script>
+ </script>
+ <script type="application/json" id="clubs-json">
+[
+ {
+  "id": 19,
+  "name": "Arsenal",
+  "shortName": "ARS",
+  "league": "Premier League",
+  "manager": "Diogo",
+  "stadium": "Emirates Stadium",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/19/120.png",
+  "summary": "Balanced squad, strong attacking form and solid consistency in recent rounds.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Maignan"
+   },
+   {
+    "id": null,
+    "name": "Timber"
+   },
+   {
+    "id": null,
+    "name": "Hincapié"
+   },
+   {
+    "id": null,
+    "name": "Saliba"
+   },
+   {
+    "id": null,
+    "name": "Davies"
+   },
+   {
+    "id": null,
+    "name": "Zambo Anguissa"
+   },
+   {
+    "id": null,
+    "name": "Kamara"
+   },
+   {
+    "id": null,
+    "name": "Rodri"
+   },
+   {
+    "id": null,
+    "name": "Doan"
+   },
+   {
+    "id": null,
+    "name": "Ferran Torres"
+   },
+   {
+    "id": null,
+    "name": "Trossard"
+   },
+   {
+    "id": null,
+    "name": "Aké"
+   },
+   {
+    "id": null,
+    "name": "Maatsen"
+   },
+   {
+    "id": null,
+    "name": "Nico González"
+   },
+   {
+    "id": null,
+    "name": "Fabinho"
+   },
+   {
+    "id": null,
+    "name": "Brahim"
+   },
+   {
+    "id": null,
+    "name": "Openda"
+   },
+   {
+    "id": null,
+    "name": "David Neres"
+   },
+   {
+    "id": null,
+    "name": "Evanilson"
+   }
+  ]
+ },
+ {
+  "id": 15,
+  "name": "Aston Villa",
+  "shortName": "AVL",
+  "league": "Premier League",
+  "manager": "Rodrigo",
+  "stadium": "Villa Park",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/15/120.png",
+  "summary": "Competitive side, well organised and dangerous in tight spaces.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Pickford"
+   },
+   {
+    "id": null,
+    "name": "Livramento"
+   },
+   {
+    "id": null,
+    "name": "Rúben Dias"
+   },
+   {
+    "id": null,
+    "name": "Araujo"
+   },
+   {
+    "id": null,
+    "name": "Álvaro Carreras"
+   },
+   {
+    "id": null,
+    "name": "Rogers"
+   },
+   {
+    "id": null,
+    "name": "Tielemans"
+   },
+   {
+    "id": null,
+    "name": "Bellingham"
+   },
+   {
+    "id": null,
+    "name": "Olise"
+   },
+   {
+    "id": null,
+    "name": "Dembélé"
+   },
+   {
+    "id": null,
+    "name": "Álex Baena"
+   },
+   {
+    "id": null,
+    "name": "Sánchez"
+   },
+   {
+    "id": null,
+    "name": "Kadıoğlu"
+   },
+   {
+    "id": null,
+    "name": "Camavinga"
+   },
+   {
+    "id": null,
+    "name": "Gibbs-White"
+   },
+   {
+    "id": null,
+    "name": "Di María"
+   },
+   {
+    "id": null,
+    "name": "Watkins"
+   },
+   {
+    "id": null,
+    "name": "Yılmaz"
+   },
+   {
+    "id": null,
+    "name": "Castellanos"
+   }
+  ]
+ },
+ {
+  "id": 8,
+  "name": "Liverpool",
+  "shortName": "LIV",
+  "league": "Premier League",
+  "manager": "Braulio",
+  "stadium": "Anfield",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/8/240.png",
+  "summary": "High-intensity side, strong in transition and consistently productive in attack.",
+  "squad": [
+   {
+    "id": 230872,
+    "name": "Svilar"
+   },
+   {
+    "id": null,
+    "name": "Muñoz"
+   },
+   {
+    "id": null,
+    "name": "Huijsen"
+   },
+   {
+    "id": null,
+    "name": "Schlotterbeck"
+   },
+   {
+    "id": null,
+    "name": "Carlos Augusto"
+   },
+   {
+    "id": null,
+    "name": "Fermín"
+   },
+   {
+    "id": null,
+    "name": "Çalhanoğlu"
+   },
+   {
+    "id": null,
+    "name": "Rice"
+   },
+   {
+    "id": null,
+    "name": "Cherki"
+   },
+   {
+    "id": null,
+    "name": "Mbappé"
+   },
+   {
+    "id": null,
+    "name": "Grimaldo"
+   },
+   {
+    "id": null,
+    "name": "Spinazzola"
+   },
+   {
+    "id": null,
+    "name": "Éderson"
+   },
+   {
+    "id": null,
+    "name": "Otávio"
+   },
+   {
+    "id": null,
+    "name": "Iñaki Williams"
+   },
+   {
+    "id": null,
+    "name": "Undav"
+   },
+   {
+    "id": null,
+    "name": "Lang"
+   },
+   {
+    "id": null,
+    "name": "Budimir"
+   }
+  ]
+ },
+ {
+  "id": 9,
+  "name": "Manchester City",
+  "shortName": "MCI",
+  "league": "Premier League",
+  "manager": "Manager City",
+  "stadium": "Etihad Stadium",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/9/120.png",
+  "summary": "Dominant possession, a strong squad and excellent control of matches.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Baumann"
+   },
+   {
+    "id": null,
+    "name": "Aina"
+   },
+   {
+    "id": null,
+    "name": "Mario Gila"
+   },
+   {
+    "id": null,
+    "name": "Eric García"
+   },
+   {
+    "id": null,
+    "name": "Balde"
+   },
+   {
+    "id": null,
+    "name": "Eze"
+   },
+   {
+    "id": null,
+    "name": "Freuler"
+   },
+   {
+    "id": null,
+    "name": "Zaïre-Emery"
+   },
+   {
+    "id": null,
+    "name": "Politano"
+   },
+   {
+    "id": null,
+    "name": "Amoura"
+   },
+   {
+    "id": null,
+    "name": "Aktürkoğlu"
+   },
+   {
+    "id": null,
+    "name": "Marcos Llorente"
+   },
+   {
+    "id": null,
+    "name": "Konsa"
+   },
+   {
+    "id": null,
+    "name": "Valverde"
+   },
+   {
+    "id": null,
+    "name": "Fabián Ruiz"
+   },
+   {
+    "id": null,
+    "name": "Salah"
+   },
+   {
+    "id": null,
+    "name": "Lookman"
+   },
+   {
+    "id": null,
+    "name": "Gordon"
+   },
+   {
+    "id": null,
+    "name": "Griezmann"
+   }
+  ]
+ },
+ {
+  "id": 6,
+  "name": "Tottenham",
+  "shortName": "TOT",
+  "league": "Premier League",
+  "manager": "Manager Tottenham",
+  "stadium": "Tottenham Hotspur Stadium",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/6/120.png",
+  "summary": "Attack-minded side with young talent and strong creativity in midfield.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Sommer"
+   },
+   {
+    "id": null,
+    "name": "Mazraoui"
+   },
+   {
+    "id": null,
+    "name": "Botman"
+   },
+   {
+    "id": null,
+    "name": "Koulibaly"
+   },
+   {
+    "id": null,
+    "name": "Angeliño"
+   },
+   {
+    "id": null,
+    "name": "Xavi Simons"
+   },
+   {
+    "id": null,
+    "name": "Stiller"
+   },
+   {
+    "id": null,
+    "name": "Luis Milla"
+   },
+   {
+    "id": null,
+    "name": "Lamine Yamal"
+   },
+   {
+    "id": null,
+    "name": "Ekitiké"
+   },
+   {
+    "id": null,
+    "name": "Marmoush"
+   },
+   {
+    "id": null,
+    "name": "Van Dijk"
+   },
+   {
+    "id": null,
+    "name": "Ferland Mendy"
+   },
+   {
+    "id": null,
+    "name": "Kanté"
+   },
+   {
+    "id": null,
+    "name": "Musiala"
+   },
+   {
+    "id": null,
+    "name": "Kudus"
+   },
+   {
+    "id": null,
+    "name": "Solanke"
+   },
+   {
+    "id": null,
+    "name": "Carrasco"
+   },
+   {
+    "id": null,
+    "name": "Wissa"
+   }
+  ]
+ },
+ {
+  "id": 14,
+  "name": "Manchester United",
+  "shortName": "MUN",
+  "league": "Premier League",
+  "manager": "Manager United",
+  "stadium": "Old Trafford",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/14/120.png",
+  "summary": "Balanced team with a strong midfield and several attacking options.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Emiliano Martínez"
+   },
+   {
+    "id": null,
+    "name": "Reece James"
+   },
+   {
+    "id": null,
+    "name": "Konaté"
+   },
+   {
+    "id": null,
+    "name": "Romero"
+   },
+   {
+    "id": null,
+    "name": "Antonee Robinson"
+   },
+   {
+    "id": null,
+    "name": "Enzo Fernández"
+   },
+   {
+    "id": null,
+    "name": "Kimmich"
+   },
+   {
+    "id": null,
+    "name": "Locatelli"
+   },
+   {
+    "id": null,
+    "name": "Mahrez"
+   },
+   {
+    "id": null,
+    "name": "Gyökeres"
+   },
+   {
+    "id": null,
+    "name": "Rafael Leão"
+   },
+   {
+    "id": null,
+    "name": "Laporte"
+   },
+   {
+    "id": null,
+    "name": "Digne"
+   },
+   {
+    "id": null,
+    "name": "Lobotka"
+   },
+   {
+    "id": null,
+    "name": "Nkunku"
+   },
+   {
+    "id": null,
+    "name": "Sané"
+   },
+   {
+    "id": null,
+    "name": "Vlahović"
+   },
+   {
+    "id": null,
+    "name": "Galeno"
+   },
+   {
+    "id": null,
+    "name": "Igor Thiago"
+   }
+  ]
+ },
+ {
+  "id": 20,
+  "name": "Newcastle",
+  "shortName": "NEW",
+  "league": "Premier League",
+  "manager": "Manager Newcastle",
+  "stadium": "St James' Park",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/20/120.png",
+  "summary": "Attack-minded team with international stars and great creative quality.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Ederson"
+   },
+   {
+    "id": null,
+    "name": "Cash"
+   },
+   {
+    "id": null,
+    "name": "Éder Militão"
+   },
+   {
+    "id": null,
+    "name": "Murillo"
+   },
+   {
+    "id": null,
+    "name": "Aït-Nouri"
+   },
+   {
+    "id": null,
+    "name": "Isi"
+   },
+   {
+    "id": null,
+    "name": "Messi"
+   },
+   {
+    "id": null,
+    "name": "Vitinha"
+   },
+   {
+    "id": null,
+    "name": "Honorat"
+   },
+   {
+    "id": null,
+    "name": "João Pedro"
+   },
+   {
+    "id": null,
+    "name": "Al-Dawsari"
+   },
+   {
+    "id": null,
+    "name": "De Ketelaere"
+   },
+   {
+    "id": null,
+    "name": "Gavi"
+   },
+   {
+    "id": null,
+    "name": "Diaby"
+   },
+   {
+    "id": null,
+    "name": "Toney"
+   },
+   {
+    "id": null,
+    "name": "Vini Jr."
+   },
+   {
+    "id": null,
+    "name": "Lautaro Martínez"
+   }
+  ]
+ },
+ {
+  "id": 13,
+  "name": "Everton",
+  "shortName": "EVE",
+  "league": "Premier League",
+  "manager": "Manager Everton",
+  "stadium": "Goodison Park",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/13/120.png",
+  "summary": "Physical team with a powerful attack and a technical midfield.",
+  "squad": [
+   {
+    "id": null,
+    "name": "ter Stegen"
+   },
+   {
+    "id": null,
+    "name": "Laimer"
+   },
+   {
+    "id": null,
+    "name": "Bremer"
+   },
+   {
+    "id": null,
+    "name": "Akanji"
+   },
+   {
+    "id": null,
+    "name": "Hall"
+   },
+   {
+    "id": null,
+    "name": "Reijnders"
+   },
+   {
+    "id": null,
+    "name": "Gravenberch"
+   },
+   {
+    "id": null,
+    "name": "Rabiot"
+   },
+   {
+    "id": null,
+    "name": "Mbeumo"
+   },
+   {
+    "id": null,
+    "name": "Harry Kane"
+   },
+   {
+    "id": null,
+    "name": "Doku"
+   },
+   {
+    "id": null,
+    "name": "Stones"
+   },
+   {
+    "id": null,
+    "name": "Gosens"
+   },
+   {
+    "id": null,
+    "name": "Fofana"
+   },
+   {
+    "id": null,
+    "name": "Brandt"
+   },
+   {
+    "id": null,
+    "name": "Giuliano"
+   },
+   {
+    "id": null,
+    "name": "Havertz"
+   },
+   {
+    "id": null,
+    "name": "Álvaro García"
+   },
+   {
+    "id": null,
+    "name": "Gabriel Jesus"
+   }
+  ]
+ },
+ {
+  "id": 27,
+  "name": "Burnley",
+  "shortName": "BUR",
+  "league": "Premier League",
+  "manager": "Manager Burnley",
+  "stadium": "Turf Moor",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/27/120.png",
+  "summary": "Intense side with a very powerful attack and a technical midfield.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Unai Simón"
+   },
+   {
+    "id": null,
+    "name": "Matheus Nunes"
+   },
+   {
+    "id": null,
+    "name": "Cubarsí"
+   },
+   {
+    "id": null,
+    "name": "Emre Can"
+   },
+   {
+    "id": null,
+    "name": "Dest"
+   },
+   {
+    "id": null,
+    "name": "Pablo Barrios"
+   },
+   {
+    "id": null,
+    "name": "Anderson"
+   },
+   {
+    "id": null,
+    "name": "Veerman"
+   },
+   {
+    "id": null,
+    "name": "Savinho"
+   },
+   {
+    "id": null,
+    "name": "Haaland"
+   },
+   {
+    "id": null,
+    "name": "Rashford"
+   },
+   {
+    "id": null,
+    "name": "Rüdiger"
+   },
+   {
+    "id": null,
+    "name": "Calafiori"
+   },
+   {
+    "id": null,
+    "name": "Rúben Neves"
+   },
+   {
+    "id": null,
+    "name": "Frenkie Jong"
+   },
+   {
+    "id": null,
+    "name": "Greenwood"
+   },
+   {
+    "id": null,
+    "name": "Retegui"
+   },
+   {
+    "id": null,
+    "name": "Raphinha"
+   },
+   {
+    "id": null,
+    "name": "Šeško"
+   }
+  ]
+ },
+ {
+  "id": 18,
+  "name": "Chelsea",
+  "shortName": "CHE",
+  "league": "Premier League",
+  "manager": "Manager Chelsea",
+  "stadium": "Stamford Bridge",
+  "logoUrl": "https://cdn.sofifa.net/meta/team/18/120.png",
+  "summary": "Technical team with a creative midfield and several attacking options.",
+  "squad": [
+   {
+    "id": null,
+    "name": "Kobel"
+   },
+   {
+    "id": null,
+    "name": "Dumfries"
+   },
+   {
+    "id": null,
+    "name": "Vivian"
+   },
+   {
+    "id": null,
+    "name": "Lacroix"
+   },
+   {
+    "id": null,
+    "name": "Guerreiro"
+   },
+   {
+    "id": null,
+    "name": "Gündoğan"
+   },
+   {
+    "id": null,
+    "name": "Mikel Merino"
+   },
+   {
+    "id": null,
+    "name": "Kovačić"
+   },
+   {
+    "id": null,
+    "name": "Iago Aspas"
+   },
+   {
+    "id": null,
+    "name": "Aubameyang"
+   },
+   {
+    "id": null,
+    "name": "Barnes"
+   },
+   {
+    "id": null,
+    "name": "Pacho"
+   },
+   {
+    "id": null,
+    "name": "Theo Hernández"
+   },
+   {
+    "id": null,
+    "name": "Ødegaard"
+   },
+   {
+    "id": null,
+    "name": "Pedri"
+   },
+   {
+    "id": null,
+    "name": "Lukébakio"
+   },
+   {
+    "id": null,
+    "name": "Jonathan David"
+   },
+   {
+    "id": null,
+    "name": "Mitoma"
+   },
+   {
+    "id": null,
+    "name": "Son"
+   }
+  ]
+ }
+]
+ </script>
+ <script type="application/json" id="players-json">
+[]
+ </script>
+ <script type="application/json" id="matches-json">
+[
+ {
+  "id": 1,
+  "round": 1,
+  "date": "2026-01-10",
+  "homeClubId": 19,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 2,
+  "round": 1,
+  "date": "2026-01-10",
+  "homeClubId": 15,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 3,
+  "round": 1,
+  "date": "2026-01-10",
+  "homeClubId": 8,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 4,
+  "round": 1,
+  "date": "2026-01-10",
+  "homeClubId": 9,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 5,
+  "round": 1,
+  "date": "2026-01-10",
+  "homeClubId": 6,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 6,
+  "round": 2,
+  "date": "2026-01-17",
+  "homeClubId": 27,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 7,
+  "round": 2,
+  "date": "2026-01-17",
+  "homeClubId": 18,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 8,
+  "round": 2,
+  "date": "2026-01-17",
+  "homeClubId": 15,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 9,
+  "round": 2,
+  "date": "2026-01-17",
+  "homeClubId": 8,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 10,
+  "round": 2,
+  "date": "2026-01-17",
+  "homeClubId": 9,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 11,
+  "round": 3,
+  "date": "2026-01-24",
+  "homeClubId": 19,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 12,
+  "round": 3,
+  "date": "2026-01-24",
+  "homeClubId": 27,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 13,
+  "round": 3,
+  "date": "2026-01-24",
+  "homeClubId": 18,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 14,
+  "round": 3,
+  "date": "2026-01-24",
+  "homeClubId": 15,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 15,
+  "round": 3,
+  "date": "2026-01-24",
+  "homeClubId": 8,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 16,
+  "round": 4,
+  "date": "2026-01-31",
+  "homeClubId": 20,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 17,
+  "round": 4,
+  "date": "2026-01-31",
+  "homeClubId": 13,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 18,
+  "round": 4,
+  "date": "2026-01-31",
+  "homeClubId": 27,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 19,
+  "round": 4,
+  "date": "2026-01-31",
+  "homeClubId": 18,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 20,
+  "round": 4,
+  "date": "2026-01-31",
+  "homeClubId": 15,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 21,
+  "round": 5,
+  "date": "2026-02-07",
+  "homeClubId": 19,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 22,
+  "round": 5,
+  "date": "2026-02-07",
+  "homeClubId": 20,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 23,
+  "round": 5,
+  "date": "2026-02-07",
+  "homeClubId": 13,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 24,
+  "round": 5,
+  "date": "2026-02-07",
+  "homeClubId": 27,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 25,
+  "round": 5,
+  "date": "2026-02-07",
+  "homeClubId": 18,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 26,
+  "round": 6,
+  "date": "2026-02-14",
+  "homeClubId": 6,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 27,
+  "round": 6,
+  "date": "2026-02-14",
+  "homeClubId": 14,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 28,
+  "round": 6,
+  "date": "2026-02-14",
+  "homeClubId": 20,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 29,
+  "round": 6,
+  "date": "2026-02-14",
+  "homeClubId": 13,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 30,
+  "round": 6,
+  "date": "2026-02-14",
+  "homeClubId": 27,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 31,
+  "round": 7,
+  "date": "2026-02-21",
+  "homeClubId": 19,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 32,
+  "round": 7,
+  "date": "2026-02-21",
+  "homeClubId": 6,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 33,
+  "round": 7,
+  "date": "2026-02-21",
+  "homeClubId": 14,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 34,
+  "round": 7,
+  "date": "2026-02-21",
+  "homeClubId": 20,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 35,
+  "round": 7,
+  "date": "2026-02-21",
+  "homeClubId": 13,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 36,
+  "round": 8,
+  "date": "2026-02-28",
+  "homeClubId": 8,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 37,
+  "round": 8,
+  "date": "2026-02-28",
+  "homeClubId": 9,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 38,
+  "round": 8,
+  "date": "2026-02-28",
+  "homeClubId": 6,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 39,
+  "round": 8,
+  "date": "2026-02-28",
+  "homeClubId": 14,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 40,
+  "round": 8,
+  "date": "2026-02-28",
+  "homeClubId": 20,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 41,
+  "round": 9,
+  "date": "2026-03-07",
+  "homeClubId": 19,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 42,
+  "round": 9,
+  "date": "2026-03-07",
+  "homeClubId": 8,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 43,
+  "round": 9,
+  "date": "2026-03-07",
+  "homeClubId": 9,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 44,
+  "round": 9,
+  "date": "2026-03-07",
+  "homeClubId": 6,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 45,
+  "round": 9,
+  "date": "2026-03-07",
+  "homeClubId": 14,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 46,
+  "round": 10,
+  "date": "2026-03-14",
+  "homeClubId": 18,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 47,
+  "round": 10,
+  "date": "2026-03-14",
+  "homeClubId": 27,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 48,
+  "round": 10,
+  "date": "2026-03-14",
+  "homeClubId": 13,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 49,
+  "round": 10,
+  "date": "2026-03-14",
+  "homeClubId": 20,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 50,
+  "round": 10,
+  "date": "2026-03-14",
+  "homeClubId": 14,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 51,
+  "round": 11,
+  "date": "2026-03-21",
+  "homeClubId": 19,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 52,
+  "round": 11,
+  "date": "2026-03-21",
+  "homeClubId": 13,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 53,
+  "round": 11,
+  "date": "2026-03-21",
+  "homeClubId": 20,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 54,
+  "round": 11,
+  "date": "2026-03-21",
+  "homeClubId": 14,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 55,
+  "round": 11,
+  "date": "2026-03-21",
+  "homeClubId": 6,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 56,
+  "round": 12,
+  "date": "2026-03-28",
+  "homeClubId": 13,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 57,
+  "round": 12,
+  "date": "2026-03-28",
+  "homeClubId": 20,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 58,
+  "round": 12,
+  "date": "2026-03-28",
+  "homeClubId": 14,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 59,
+  "round": 12,
+  "date": "2026-03-28",
+  "homeClubId": 6,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 60,
+  "round": 12,
+  "date": "2026-03-28",
+  "homeClubId": 9,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 61,
+  "round": 13,
+  "date": "2026-04-04",
+  "homeClubId": 19,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 62,
+  "round": 13,
+  "date": "2026-04-04",
+  "homeClubId": 14,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 63,
+  "round": 13,
+  "date": "2026-04-04",
+  "homeClubId": 6,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 64,
+  "round": 13,
+  "date": "2026-04-04",
+  "homeClubId": 9,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 65,
+  "round": 13,
+  "date": "2026-04-04",
+  "homeClubId": 8,
+  "awayClubId": 15,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 66,
+  "round": 14,
+  "date": "2026-04-11",
+  "homeClubId": 14,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 67,
+  "round": 14,
+  "date": "2026-04-11",
+  "homeClubId": 6,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 68,
+  "round": 14,
+  "date": "2026-04-11",
+  "homeClubId": 9,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 69,
+  "round": 14,
+  "date": "2026-04-11",
+  "homeClubId": 8,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 70,
+  "round": 14,
+  "date": "2026-04-11",
+  "homeClubId": 15,
+  "awayClubId": 18,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 71,
+  "round": 15,
+  "date": "2026-04-18",
+  "homeClubId": 19,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 72,
+  "round": 15,
+  "date": "2026-04-18",
+  "homeClubId": 9,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 73,
+  "round": 15,
+  "date": "2026-04-18",
+  "homeClubId": 8,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 74,
+  "round": 15,
+  "date": "2026-04-18",
+  "homeClubId": 15,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 75,
+  "round": 15,
+  "date": "2026-04-18",
+  "homeClubId": 18,
+  "awayClubId": 27,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 76,
+  "round": 16,
+  "date": "2026-04-25",
+  "homeClubId": 9,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 77,
+  "round": 16,
+  "date": "2026-04-25",
+  "homeClubId": 8,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 78,
+  "round": 16,
+  "date": "2026-04-25",
+  "homeClubId": 15,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 79,
+  "round": 16,
+  "date": "2026-04-25",
+  "homeClubId": 18,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 80,
+  "round": 16,
+  "date": "2026-04-25",
+  "homeClubId": 27,
+  "awayClubId": 13,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 81,
+  "round": 17,
+  "date": "2026-05-02",
+  "homeClubId": 19,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 82,
+  "round": 17,
+  "date": "2026-05-02",
+  "homeClubId": 15,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 83,
+  "round": 17,
+  "date": "2026-05-02",
+  "homeClubId": 18,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 84,
+  "round": 17,
+  "date": "2026-05-02",
+  "homeClubId": 27,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 85,
+  "round": 17,
+  "date": "2026-05-02",
+  "homeClubId": 13,
+  "awayClubId": 20,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 86,
+  "round": 18,
+  "date": "2026-05-09",
+  "homeClubId": 15,
+  "awayClubId": 19,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 87,
+  "round": 18,
+  "date": "2026-05-09",
+  "homeClubId": 18,
+  "awayClubId": 8,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 88,
+  "round": 18,
+  "date": "2026-05-09",
+  "homeClubId": 27,
+  "awayClubId": 9,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 89,
+  "round": 18,
+  "date": "2026-05-09",
+  "homeClubId": 13,
+  "awayClubId": 6,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ },
+ {
+  "id": 90,
+  "round": 18,
+  "date": "2026-05-09",
+  "homeClubId": 20,
+  "awayClubId": 14,
+  "homeGoals": "",
+  "awayGoals": "",
+  "status": "scheduled",
+  "submittedByUserId": null,
+  "approvedByUserId": null,
+  "notes": "",
+  "evidenceImage": "",
+  "events": [],
+  "audit": []
+ }
+]
+ </script>
+
+ <script>
+  const STORAGE_KEY = "eafc_manager_mode_embedded_v1";
+
+  const defaultUiState = {
+   currentUserId: null,
+   currentTab: "meu-clube",
+   selectedMatchId: null
+  };
+
+  let state = {
+   league: { name: "", season: "" },
+   currentUserId: null,
+   currentTab: "meu-clube",
+   selectedMatchId: null,
+   users: [],
+   clubs: [],
+   players: [],
+   matches: []
+  };
+
+  function loadEmbeddedJSON(scriptId, fallbackValue = null) {
+   const el = document.getElementById(scriptId);
+   if (!el) return fallbackValue;
+
+   const raw = el.textContent.trim();
+   if (!raw) return fallbackValue;
+
+   try {
+    return JSON.parse(raw);
+   } catch (error) {
+    console.warn(`Falha ao ler o bloco JSON ${scriptId}.`, error);
+    return fallbackValue;
+   }
+  }
+
+  async function init() {
+   try {
+    const appDate = loadEmbeddedJSON("app-data-json", { league: { name: "", season: "" }, users: [] });
+    const clubsDate = loadEmbeddedJSON("clubs-json", []);
+    const playersDate = loadEmbeddedJSON("players-json", []);
+    const matchesDate = loadEmbeddedJSON("matches-json", []);
+
+    const savedUi = loadUiState();
+    const snapshot = loadLocalSnapshot();
+
+    state = normalizeState({
+     league: appDate?.league || { name: "", season: "" },
+     currentUserId: savedUi.currentUserId,
+     currentTab: savedUi.currentTab || "meu-clube",
+     selectedMatchId: savedUi.selectedMatchId || null,
+     users: Array.isArray(appDate?.users) ? appDate.users : [],
+     clubs: Array.isArray(clubsDate) ? clubsDate : [],
+     players: Array.isArray(playersDate) ? playersDate : [],
+     matches: mergeMatches(Array.isArray(matchesDate) ? matchesDate : [], snapshot?.matches || [])
+    });
+
+    render();
+   } catch (error) {
+    document.body.innerHTML = `
+     <div style="padding:40px;max-width:900px;margin:0 auto;">
+      <h1>Erro ao carregar os dados embutidos</h1>
+      <p>Confirma se os blocos JSON foram colados correctamente dentro do HTML.</p>
+      <pre>${escapeHtml(String(error))}</pre>
+     </div>
+    `;
+   }
+  }
+
+  function loadUiState() {
+   const raw = localStorage.getItem(STORAGE_KEY);
+   if (!raw) return structuredClone(defaultUiState);
+   try {
+    return { ...structuredClone(defaultUiState), ...JSON.parse(raw) };
+   } catch {
+    return structuredClone(defaultUiState);
+   }
+  }
+
+  function saveUiState() {
+   localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    currentUserId: state.currentUserId,
+    currentTab: state.currentTab,
+    selectedMatchId: state.selectedMatchId
+   }));
+  }
+
+  function loadLocalSnapshot() {
+   const raw = localStorage.getItem("eafc_manager_mode_embedded_snapshot");
+   if (!raw) return null;
+   try {
+    return JSON.parse(raw);
+   } catch {
+    return null;
+   }
+  }
+
+  function mergeMatches(baseMatches, snapshotMatches) {
+   if (!Array.isArray(snapshotMatches) || !snapshotMatches.length) return baseMatches;
+   const snapshotById = new Map(snapshotMatches.map(match => [match.id, match]));
+   return baseMatches.map(match => snapshotById.get(match.id) || match);
+  }
+
+  function normalizeState(inputState) {
+   const clone = structuredClone(inputState);
+
+   clone.clubs = (clone.clubs || []).map(club => ({
+    ...club,
+    squad: normalizeSquad(club.squad || [])
+   }));
+
+   clone.matches = (clone.matches || []).map(match => ({
+    ...match,
+    events: Array.isArray(match.events) ? match.events : [],
+    audit: Array.isArray(match.audit) ? match.audit : [],
+    evidenceImage: match?.evidenceImage || ""
+   }));
+
+   return clone;
+  }
+
+  function normalizeSquad(squad) {
+   return squad.map(player => {
+    if (typeof player === "string") return { id: null, name: player };
+    return {
+     id: player?.id ?? null,
+     name: player?.name ?? ""
+    };
+   }).filter(player => player.name);
+  }
+
+  function saveAllToLocalSnapshot() {
+   localStorage.setItem("eafc_manager_mode_embedded_snapshot", JSON.stringify({
+    matches: state.matches
+   }));
+  }
+
+  function escapeHtml(value) {
+   return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+  }
+
+  function toast(message, type = "success") {
+   const wrap = document.getElementById("toastWrap");
+   const el = document.createElement("div");
+   el.className = `toast ${type}`;
+   el.innerHTML = `<strong>${type === "success" ? "Success" : type === "warning" ? "Warning" : "Attention"}</strong><div class="small" style="margin-top:6px;color:var(--text);">${escapeHtml(message)}</div>`;
+   wrap.appendChild(el);
+   setTimeout(() => el.remove(), 3200);
+  }
+
+  function isAdmin() {
+   const user = getCurrentUser();
+   return user?.role === "admin";
+  }
+
+  function nowStamp() {
+   const d = new Date();
+   const pad = n => String(n).padStart(2, "0");
+   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  const ROUND_RELEASE_START = new Date(2026, 2, 15);
+
+  function startOfLocalDay(date) {
+   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  function getUnlockedRoundCount() {
+   const today = startOfLocalDay(new Date());
+   const anchor = startOfLocalDay(ROUND_RELEASE_START);
+   const diffDays = Math.floor((today - anchor) / 86400000);
+   const weeksPassed = diffDays < 0 ? 0 : Math.floor(diffDays / 7);
+   return Math.min(18, 3 + (weeksPassed * 3));
+  }
+
+  function isMatchUnlocked(match) {
+   return Number(match?.round || 0) <= getUnlockedRoundCount();
+  }
+
+  function getNextReleaseDate() {
+   const unlocked = getUnlockedRoundCount();
+   if (unlocked >= 18) return null;
+   const weeksPassed = Math.floor((unlocked - 3) / 3);
+   const next = new Date(ROUND_RELEASE_START);
+   next.setDate(next.getDate() + ((weeksPassed + 1) * 7));
+   return next;
+  }
+
+  function formatReleaseDate(date) {
+   if (!date) return 'All rounds are now open.';
+   return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function getCurrentUser() {
+   return state.users.find(user => user.id === state.currentUserId) || null;
+  }
+
+  function getClubById(id) {
+   return state.clubs.find(club => club.id === id) || null;
+  }
+
+  function getMatchById(id) {
+   return state.matches.find(match => match.id === id) || null;
+  }
+
+  function getCurrentClub() {
+   const user = getCurrentUser();
+   if (!user || !user.clubId) return null;
+   return getClubById(user.clubId);
+  }
+
+  function getSquadList(clubId) {
+   return getClubById(clubId)?.squad || [];
+  }
+
+  function getClubLogoUrl(club) {
+   if (!club) return "";
+   if (club.logoUrl) return club.logoUrl;
+   const fallbackMap = {
+    "Arsenal": "https://cdn.sofifa.net/meta/team/19/240.png",
+    "Aston Villa": "https://cdn.sofifa.net/meta/team/2/240.png",
+    "Liverpool": "https://cdn.sofifa.net/meta/team/8/240.png",
+    "Manchester City": "https://cdn.sofifa.net/meta/team/10/240.png"
+   };
+   return fallbackMap[club.name] || "";
+  }
+
+  function renderClubCell(clubName, logoUrl) {
+   const logo = logoUrl ? `<img class="table-logo" src="${escapeHtml(logoUrl)}" alt="${escapeHtml(clubName)}" />` : "";
+   return `<div class="club-cell">${logo}<span>${escapeHtml(clubName)}</span></div>`;
+  }
+
+
+  function sortText(a, b) {
+   return String(a ?? "").localeCompare(String(b ?? ""), "pt-BR", { sensitivity: "base" });
+  }
+
+  function getSortedSquadList(clubId) {
+   return [...getSquadList(clubId)].sort((a, b) => sortText(a.name, b.name));
+  }
+
+  function renderEvidencePreview(match) {
+   if (!match?.evidenceImage) return "";
+   return `
+    <div class="evidence-preview">
+     <img src="${match.evidenceImage}" alt="Match evidence" />
+    </div>
+   `;
+  }
+
+  function formatMatchLabel(match) {
+   const home = getClubById(match.homeClubId);
+   const away = getClubById(match.awayClubId);
+   return `${home?.name || "?"} v ${away?.name || "?"}`;
+  }
+
+  function getApprovedMatches() {
+   return state.matches.filter(match => match.status === "approved");
+  }
+
+  function getClubApprovedMatches(clubId) {
+   return getApprovedMatches().filter(match => match.homeClubId === clubId || match.awayClubId === clubId);
+  }
+
+  function getClubAllMatches(clubId) {
+   return state.matches.filter(match => match.homeClubId === clubId || match.awayClubId === clubId);
+  }
+
+  function getClubPendingMatches(clubId) {
+   return state.matches.filter(match => match.status === "pending" && (match.homeClubId === clubId || match.awayClubId === clubId));
+  }
+
+  function getClubScheduledMatches(clubId) {
+   return state.matches.filter(match => match.status === "scheduled" && (match.homeClubId === clubId || match.awayClubId === clubId));
+  }
+
+  function getClubNextMatch(clubId) {
+   return getClubScheduledMatches(clubId).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
+  }
+
+  function getClubForm(clubId, limit = 5) {
+   const matches = getClubApprovedMatches(clubId)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, limit);
+
+   return matches.map(match => {
+    const isHome = match.homeClubId === clubId;
+    const gf = isHome ? Number(match.homeGoals) : Number(match.awayGoals);
+    const ga = isHome ? Number(match.awayGoals) : Number(match.homeGoals);
+    if (gf > ga) return "V";
+    if (gf < ga) return "D";
+    return "E";
+   });
+  }
+
+  function getClubStatsFromMatches(clubId) {
+   const approvedMatches = getClubApprovedMatches(clubId);
+   let played = 0, wins = 0, draws = 0, losses = 0, gf = 0, ga = 0;
+
+   approvedMatches.forEach(match => {
+    const isHome = match.homeClubId === clubId;
+    const goalsFor = isHome ? Number(match.homeGoals) : Number(match.awayGoals);
+    const goalsAgainst = isHome ? Number(match.awayGoals) : Number(match.homeGoals);
+
+    played += 1;
+    gf += goalsFor;
+    ga += goalsAgainst;
+
+    if (goalsFor > goalsAgainst) wins += 1;
+    else if (goalsFor < goalsAgainst) losses += 1;
+    else draws += 1;
+   });
+
+   return {
+    played, wins, draws, losses, gf, ga,
+    gd: gf - ga,
+    points: wins * 3 + draws
+   };
+  }
+
+  function buildLeagueTable() {
+   const rows = state.clubs.map(club => ({
+    clubId: club.id,
+    clubName: club.name,
+    shortName: club.shortName,
+    ...getClubStatsFromMatches(club.id)
+   }));
+
+   rows.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.gd !== a.gd) return b.gd - a.gd;
+    if (b.gf !== a.gf) return b.gf - a.gf;
+    return a.clubName.localeCompare(b.clubName);
+   });
+
+   return rows.map((row, index) => ({ ...row, position: index + 1 }));
+  }
+
+  function getReducedTableForClub(clubId) {
+   const table = buildLeagueTable();
+   const index = table.findIndex(row => row.clubId === clubId);
+   if (index === -1) return [];
+   return table.slice(Math.max(0, index - 1), Math.min(table.length, index + 2));
+  }
+
+  function getClubNarrative(clubId) {
+   const table = buildLeagueTable();
+   const row = table.find(item => item.clubId === clubId);
+   if (!row) return "There are no approved fixtures yet to shape the season story.";
+
+   const above = table[row.position - 2];
+   const below = table[row.position];
+   let text = `${row.clubName} are in ${row.position} place with ${row.points} points.`;
+   if (above) text += ` They are ${above.points - row.points} point(s) ${above.clubName}.`;
+   if (below) text += ` They are ${row.points - below.points} point(s) vantagem sobre ${below.clubName}.`;
+   return text;
+  }
+
+
+  function getClubPlayerStats(clubId) {
+   const squad = getSortedSquadList(clubId);
+   const map = new Map();
+
+   squad.forEach(player => {
+    map.set(player.name, {
+     id: player.id,
+     name: player.name,
+     goals: 0,
+     assists: 0,
+     yellow: 0,
+     red: 0
+    });
+   });
+
+   getClubApprovedMatches(clubId).forEach(match => {
+    match.events.forEach(event => {
+     const isClubEvent = (event.teamSide === "home" && match.homeClubId === clubId) || (event.teamSide === "away" && match.awayClubId === clubId);
+     if (!isClubEvent) return;
+
+     if (event.player && map.has(event.player)) {
+      if (event.type === "goal") map.get(event.player).goals += 1;
+      if (event.type === "yellow") map.get(event.player).yellow += 1;
+      if (event.type === "red") map.get(event.player).red += 1;
+     }
+
+     if (event.type === "goal" && event.assist && event.assist !== "No assist" && map.has(event.assist)) {
+      map.get(event.assist).assists += 1;
+     }
+    });
+   });
+
+   return [...map.values()].sort((a, b) => sortText(a.name, b.name));
+  }
+
+  function getTopScorer(clubId) {
+   return getClubPlayerStats(clubId)[0] || null;
+  }
+
+  function getTopAssist(clubId) {
+   return [...getClubPlayerStats(clubId)].sort((a, b) => {
+    if (b.assists !== a.assists) return b.assists - a.assists;
+    if (b.goals !== a.goals) return b.goals - a.goals;
+    return a.name.localeCompare(b.name);
+   })[0] || null;
+  }
+
+  function getMostBooked(clubId) {
+   return [...getClubPlayerStats(clubId)].sort((a, b) => {
+    const totalA = a.yellow + a.red * 2;
+    const totalB = b.yellow + b.red * 2;
+    if (totalB !== totalA) return totalB - totalA;
+    return a.name.localeCompare(b.name);
+   })[0] || null;
+  }
+
+
+
+  function getAllPlayerStats() {
+   const map = new Map();
+
+   state.clubs.forEach(club => {
+    getSortedSquadList(club.id).forEach(player => {
+     const key = `${club.id}::${player.name}`;
+     map.set(key, {
+      clubId: club.id,
+      clubName: club.name,
+      playerName: player.name,
+      goals: 0,
+      assists: 0,
+      yellow: 0,
+      red: 0
+     });
+    });
+   });
+
+   getApprovedMatches().forEach(match => {
+    match.events.forEach(event => {
+     const clubId = event.teamSide === "home" ? match.homeClubId : match.awayClubId;
+     const key = `${clubId}::${event.player}`;
+     if (event.player && map.has(key)) {
+      if (event.type === "goal") map.get(key).goals += 1;
+      if (event.type === "yellow") map.get(key).yellow += 1;
+      if (event.type === "red") map.get(key).red += 1;
+     }
+
+     if (event.type === "goal" && event.assist && event.assist !== "No assist") {
+      const assistKey = `${clubId}::${event.assist}`;
+      if (map.has(assistKey)) map.get(assistKey).assists += 1;
+     }
+    });
+   });
+
+   return [...map.values()];
+  }
+
+  function getLeagueTopScorers(limit = 10) {
+   return getAllPlayerStats()
+    .filter(player => player.goals > 0)
+    .sort((a, b) => {
+     if (b.goals !== a.goals) return b.goals - a.goals;
+     if (b.assists !== a.assists) return b.assists - a.assists;
+     return sortText(a.playerName, b.playerName);
+    })
+    .slice(0, limit);
+  }
+
+  function getLeagueMostBooked(limit = 10) {
+   return getAllPlayerStats()
+    .filter(player => player.yellow > 0 || player.red > 0)
+    .sort((a, b) => {
+     const totalA = a.yellow + a.red * 2;
+     const totalB = b.yellow + b.red * 2;
+     if (totalB !== totalA) return totalB - totalA;
+     if (b.red !== a.red) return b.red - a.red;
+     return sortText(a.playerName, b.playerName);
+    })
+    .slice(0, limit);
+  }
+
+  function getMatchesGroupedByRound() {
+   const grouped = new Map();
+
+   [...state.matches]
+    .sort((a, b) => {
+     if (Number(a.round) !== Number(b.round)) return Number(a.round) - Number(b.round);
+     return sortText(a.date, b.date);
+    })
+    .forEach(match => {
+     const roundKey = Number(match.round) || 0;
+     if (!grouped.has(roundKey)) grouped.set(roundKey, []);
+     grouped.get(roundKey).push(match);
+    });
+
+   return [...grouped.entries()].map(([round, matches]) => ({ round, matches }));
+  }
+
+  function getPendingApprovalsForUser() {
+   const user = getCurrentUser();
+   if (!user) return [];
+
+   return state.matches.filter(match => {
+    if (match.status !== "pending") return false;
+    if (user.role === "admin") return true;
+    if (!user.clubId) return false;
+
+    const involved = match.homeClubId === user.clubId || match.awayClubId === user.clubId;
+    if (!involved) return false;
+
+    return match.submittedByUserId !== user.id;
+   });
+  }
+
+  function canSubmitMatch(homeClubId, awayClubId) {
+   const user = getCurrentUser();
+   if (!user) return false;
+   if (user.role === "admin") return true;
+   if (!user.clubId) return false;
+   return user.clubId === homeClubId || user.clubId === awayClubId;
+  }
+
+  function canApproveMatch(match) {
+   const user = getCurrentUser();
+   if (!user) return false;
+   if (user.role === "admin") return true;
+   if (!user.clubId) return false;
+
+   const involved = match.homeClubId === user.clubId || match.awayClubId === user.clubId;
+   if (!involved) return false;
+   return match.submittedByUserId !== user.id && match.status === "pending";
+  }
+
+  function switchTab(tab) {
+   state.currentTab = tab;
+   saveUiState();
+   render();
+  }
+
+  function login(userId) {
+   state.currentUserId = Number(userId);
+   state.currentTab = "meu-clube";
+   saveUiState();
+   render();
+   toast(`Signed in as ${getCurrentUser().name}.`);
+  }
+
+  function logout() {
+   state.currentUserId = null;
+   saveUiState();
+   render();
+   toast("Signed out.", "warning");
+  }
+
+  function openMatch(matchId) {
+   state.selectedMatchId = Number(matchId);
+   state.currentTab = "partidas";
+   saveUiState();
+   render();
+  }
+
+  function render() {
+   if (!state.currentUserId) renderLogin();
+   else renderApp();
+  }
+
+  function renderLogin() {
+   const loginShell = document.getElementById("loginShell");
+   const appShell = document.getElementById("appShell");
+
+   appShell.classList.add("hidden");
+   loginShell.classList.remove("hidden");
+
+   loginShell.innerHTML = `
+    <div class="login-card">
+     <div class="login-hero">
+      <span class="login-badge">Career control centre</span>
+      <h1 class="login-title">Manager Mode EAFC</h1>
+      <p class="login-copy">
+       EAFC is only for playing the fixtures and capturing the evidence. Everything else is managed here:
+       club overview, fixture planning, results, approvals, league table, statistics and match history.
+      </p>
+
+      <div class="login-points">
+       <div class="login-point">
+        <strong>User-based view</strong>
+        <div class="small">Each manager signs in directly to their own club dashboard.</div>
+       </div>
+       <div class="login-point">
+        <strong>Centralised squad data</strong>
+        <div class="small">Goals, assists and cards are pulled straight from the club squad list.</div>
+       </div>
+       <div class="login-point">
+        <strong>Separate permissions</strong>
+        <div class="small">The administrator has full oversight. Managers only see and edit what is relevant to them.</div>
+       </div>
+      </div>
+     </div>
+
+     <div class="login-form">
+      <h2>Sign in to the system</h2>
+      <p class="muted">Choose a profile to simulate sign-in.</p>
+
+      <div style="margin-top:20px;">
+       <label for="loginUserSelect">User</label>
+       <select id="loginUserSelect">
+        ${state.users.map(user => {
+         const club = user.clubId ? getClubById(user.clubId) : null;
+         const extra = club ? ` — ${club.name}` : " — General administration";
+         return `<option value="${user.id}">${escapeHtml(user.name)} (${user.role})${escapeHtml(extra)}</option>`;
+        }).join("")}
+       </select>
+      </div>
+
+      <div class="actions" style="margin-top:16px;">
+       <button class="btn primary" id="loginBtn">Sign in</button>
+      </div>
+
+      <div class="sidebar-box" style="margin-top:22px;">
+       <strong>No local server needed</strong>
+       <div class="small">All data is embedded directly in the HTML so it can run cleanly on a shared or public PC.</div>
+      </div>
+     </div>
+    </div>
+   `;
+
+   document.getElementById("loginBtn").addEventListener("click", () => {
+    login(document.getElementById("loginUserSelect").value);
+   });
+  }
+
+  function renderApp() {
+   const loginShell = document.getElementById("loginShell");
+   const appShell = document.getElementById("appShell");
+   loginShell.classList.add("hidden");
+   appShell.classList.remove("hidden");
+
+   const user = getCurrentUser();
+   const club = getCurrentClub();
+   const pendingApprovals = getPendingApprovalsForUser().length;
+   const myPending = club ? getClubPendingMatches(club.id).length : 0;
+
+   appShell.innerHTML = `
+    <aside class="sidebar">
+     <div class="brand">
+      Manager Mode EAFC
+      <small>Centralised career mode, with club-level visibility and separate administration.</small>
+     </div>
+
+     <div class="user-pill">
+      <strong>${escapeHtml(user.name)}</strong>
+      <div class="small" style="margin-top:6px;">Role: ${user.role === "admin" ? "Administrator" : "Manager"}</div>
+      <div class="small" style="margin-top:4px;">Club: ${club ? escapeHtml(club.name) : "General administration"}</div>
+     </div>
+
+     <nav class="nav">
+      <button class="nav-btn ${state.currentTab === "meu-clube" ? "active" : ""}" data-tab="meu-clube">My Club</button>
+      <button class="nav-btn ${state.currentTab === "partidas" ? "active" : ""}" data-tab="partidas">Fixtures</button>
+      <button class="nav-btn ${state.currentTab === "liga" ? "active" : ""}" data-tab="liga">League</button>
+      <button class="nav-btn ${state.currentTab === "historico" ? "active" : ""}" data-tab="historico">History</button>
+      <button class="nav-btn ${state.currentTab === "aprovacoes" ? "active" : ""}" data-tab="aprovacoes">Approvals ${pendingApprovals ? `(${pendingApprovals})` : ""}</button>
+      ${isAdmin() ? `<button class="nav-btn ${state.currentTab === "administracao" ? "active" : ""}" data-tab="administracao">Administration</button>` : ""}
+     </nav>
+
+     <div class="sidebar-box">
+      <h4>Quick summary</h4>
+      <div class="small">Awaiting approval: ${pendingApprovals}</div>
+      <div class="small">Pending results for your club: ${myPending}</div>
+      <div class="small">Season: ${escapeHtml(state.league.season)}</div>
+      <div class="small">League: ${escapeHtml(state.league.name)}</div>
+     </div>
+
+     <div class="sidebar-box">
+      <h4>Actions</h4>
+      <div class="actions" style="margin-top:12px;">
+       <button class="btn" id="sidebarLogoutBtn">Sign out</button>
+      </div>
+     </div>
+    </aside>
+
+    <main class="main">
+     ${renderTopBar()}
+     ${renderMeuClubTab()}
+     ${renderMatchesTab()}
+     ${renderLeagueTab()}
+     ${renderHistoricoTab()}
+     ${renderAprovacoesTab()}
+     ${isAdmin() ? renderAdminTab() : ""}
+    </main>
+   `;
+
+   attachAppEvents();
+  }
+
+  function renderTopBar() {
+   const user = getCurrentUser();
+   const club = getCurrentClub();
+   const pendingApprovals = getPendingApprovalsForUser();
+   const table = buildLeagueTable();
+   const clubRow = club ? table.find(row => row.clubId === club.id) : null;
+   const nextMatch = club ? getClubNextMatch(club.id) : null;
+
+   return `
+    <div class="sticky-topbar">
+     <div class="identity-row">
+      <div class="identity-chip"><div class="small">User</div><strong>${escapeHtml(user.name)}</strong></div>
+      <div class="identity-chip"><div class="small">Role</div><strong>${user.role === "admin" ? "Administrator" : "Manager"}</strong></div>
+      <div class="identity-chip"><div class="small">Club</div><strong>${club ? escapeHtml(club.name) : "General"}</strong></div>
+      <div class="identity-chip"><div class="small">Season</div><strong>${escapeHtml(state.league.season)}</strong></div>
+      <div class="identity-chip"><div class="small">Position</div><strong>${clubRow ? `${clubRow.position}º` : "-"}</strong></div>
+      <div class="identity-chip"><div class="small">Outstanding</div><strong>${pendingApprovals.length}</strong></div>
+     </div>
+
+     <div class="identity-row">
+      <div class="identity-chip">
+       <div class="small">Next jogo</div>
+       <strong>${nextMatch ? escapeHtml(formatMatchLabel(nextMatch)) : "Not scheduled"}</strong>
+      </div>
+     </div>
+    </div>
+   `;
+  }
+
+  function renderMeuClubTab() {
+   const club = getCurrentClub();
+
+   if (!club && isAdmin()) {
+    const table = buildLeagueTable();
+    const pending = state.matches.filter(match => match.status === "pending").length;
+    const scheduled = state.matches.filter(match => match.status === "scheduled").length;
+    return `
+     <section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}">
+      <div class="breadcrumbs">Home > My Club</div>
+      <div class="page-header"><div><h2>Painel geral do administrador</h2></div></div>
+      <div class="grid grid-4">
+       <div class="card"><h3>Clubs</h3><strong>${state.clubs.length}</strong></div>
+       <div class="card"><h3>Managers</h3><strong>${state.users.filter(u => u.role === "manager").length}</strong></div>
+       <div class="card"><h3>Pending</h3><strong>${pending}</strong></div>
+       <div class="card"><h3>Scheduled</h3><strong>${scheduled}</strong></div>
+      </div>
+      <div class="card" style="margin-top:18px;">
+       <h3>League table</h3>
+       <div class="table-wrap">
+        <table>
+         <thead><tr><th>Pos</th><th>Club</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
+         <tbody>
+          ${table.map(row => `
+           <tr>
+            <td>${row.position}</td>
+            <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
+            <td>${row.points}</td>
+            <td>${row.played}</td>
+            <td>${row.wins}</td>
+            <td>${row.draws}</td>
+            <td>${row.losses}</td>
+            <td>${row.gf}</td>
+            <td>${row.ga}</td>
+            <td>${row.gd}</td>
+           </tr>
+          `).join("")}
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </section>
+    `;
+   }
+
+   if (!club) {
+    return `<section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}"><div class="empty">Could not find the current user's club.</div></section>`;
+   }
+
+   const nextMatch = getClubNextMatch(club.id);
+   const fullTable = buildLeagueTable();
+   const stats = getClubStatsFromMatches(club.id);
+   const topScorer = getTopScorer(club.id);
+   const topAssist = getTopAssist(club.id);
+   const mostBooked = getMostBooked(club.id);
+   const playerStats = getClubPlayerStats(club.id);
+
+   return `
+    <section class="tab ${state.currentTab === "meu-clube" ? "active" : ""}">
+     <div class="breadcrumbs">Home > My Club</div>
+
+     <div class="hero">
+      <div class="card">
+       <div class="hero-club">
+        <div class="club-logo">
+         ${getClubLogoUrl(club) ? `<img src="${escapeHtml(getClubLogoUrl(club))}" alt="${escapeHtml(club.name)}" />` : `<span>No crest</span>`}
+        </div>
+        <div style="min-width:0;">
+         <div class="hero-title">
+          <h1>${escapeHtml(club.name)}</h1>
+          <span class="chip">${escapeHtml(club.shortName || "")}</span>
+          <span class="chip">${escapeHtml(club.league || "")}</span>
+         </div>
+         <div class="small">Manager: ${escapeHtml(club.manager)}</div>
+         <div class="small" style="margin-top:4px;">Stadium: ${escapeHtml(club.stadium || "No stadium listed")}</div>
+         <div style="margin-top:14px;" class="muted">${escapeHtml(getClubNarrative(club.id))}</div>
+        </div>
+       </div>
+
+       <div class="section-divider"></div>
+
+       <div class="stat-blocks">
+        <div class="stat-box"><span class="label">Matches</span><strong>${stats.played}</strong></div>
+        <div class="stat-box"><span class="label">Points</span><strong>${stats.points}</strong></div>
+        <div class="stat-box"><span class="label">Goals marcados</span><strong>${stats.gf}</strong></div>
+        <div class="stat-box"><span class="label">Goals sofridos</span><strong>${stats.ga}</strong></div>
+       </div>
+      </div>
+
+      <div class="card">
+       <div class="card-row">
+        <h3>Next jogo</h3>
+        <span class="badge">Prioridade</span>
+       </div>
+       ${
+        nextMatch ? `
+         <div style="font-size:1.2rem;font-weight:700;">${escapeHtml(formatMatchLabel(nextMatch))}</div>
+         <div class="small" style="margin-top:8px;">Round ${nextMatch.round}</div>
+         <div class="small" style="margin-top:4px;">Date: ${escapeHtml(nextMatch.date)}</div>
+         <div class="small" style="margin-top:4px;">Status: Scheduled</div>
+         <div class="actions" style="margin-top:16px;">
+          <button class="btn primary quick-open-match" data-match-id="${nextMatch.id}">Report match</button>
+         </div>
+        ` : `<div class="empty">There is no upcoming fixture scheduled for this club.</div>`
+       }
+      </div>
+     </div>
+
+     <div class="grid grid-2">
+      <div class="card">
+       <h3>Squad statistics</h3>
+       <div class="list">
+        <div class="list-item"><strong>Top scorer</strong><br><span class="small">${topScorer ? `${escapeHtml(topScorer.name)} • ${topScorer.goals} golo(s)` : "No data"}</span></div>
+        <div class="list-item"><strong>Top assist provider</strong><br><span class="small">${topAssist ? `${escapeHtml(topAssist.name)} • ${topAssist.assists} assist(s)` : "No data"}</span></div>
+        <div class="list-item"><strong>Most booked</strong><br><span class="small">${mostBooked ? `${escapeHtml(mostBooked.name)} • ${mostBooked.yellow} yellow card(s), ${mostBooked.red} red card(s)` : "No data"}</span></div>
+       </div>
+      </div>
+
+      <div class="card">
+       <div class="card-row">
+        <h3>Resumo do elenco</h3>
+        <span class="badge">Everything in one place</span>
+       </div>
+       <div class="small" style="line-height:1.7;">${escapeHtml(club.summary || "No club summary has been added yet.")}</div>
+       <div class="section-divider"></div>
+       <div class="small">Plantel base</div>
+       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${getSortedSquadList(club.id).map(player => `<span class="chip">${escapeHtml(player.name)}</span>`).join("")}
+       </div>
+       <div class="section-divider"></div>
+       <div class="small" style="margin-bottom:12px;">Squad output • goals, assists and cards</div>
+       ${
+        playerStats.length ? `
+         <div class="table-wrap">
+          <table>
+           <thead><tr><th>Player</th><th>G</th><th>A</th><th>CA</th><th>CV</th></tr></thead>
+           <tbody>
+            ${playerStats.map(player => `
+             <tr>
+              <td>${escapeHtml(player.name)}</td>
+              <td>${player.goals}</td>
+              <td>${player.assists}</td>
+              <td>${player.yellow}</td>
+              <td>${player.red}</td>
+             </tr>
+            `).join("")}
+           </tbody>
+          </table>
+         </div>
+        ` : `<div class="empty">No squad output is available yet.</div>`
+       }
+      </div>
+     </div>
+
+     <div class="card" style="margin-top:18px;">
+      <h3>Full table</h3>
+      <div class="table-wrap">
+       <table>
+        <thead><tr><th>Pos</th><th>Club</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
+        <tbody>
+         ${fullTable.map(row => `
+          <tr ${row.clubId === club.id ? 'style="background:rgba(56,189,248,0.12);"' : ""}>
+           <td>${row.position}</td>
+           <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
+           <td>${row.points}</td>
+           <td>${row.played}</td>
+           <td>${row.wins}</td>
+           <td>${row.draws}</td>
+           <td>${row.losses}</td>
+           <td>${row.gf}</td>
+           <td>${row.ga}</td>
+           <td>${row.gd}</td>
+          </tr>
+         `).join("")}
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </section>
+   `;
+  }
+
+  function renderPlayerSelectOptions(clubId) {
+   return getSortedSquadList(clubId).map(player => `<option value="${escapeHtml(player.name)}">${escapeHtml(player.name)}</option>`).join("");
+  }
+
+  function renderGoalRows(match, teamSide) {
+   const isHome = teamSide === "home";
+   const clubId = isHome ? match.homeClubId : match.awayClubId;
+   const club = getClubById(clubId);
+   const goalCount = Number(isHome ? match.homeGoals : match.awayGoals) || 0;
+   const goalEvents = match.events.filter(e => e.teamSide === teamSide && e.type === "goal");
+
+   return `
+    <div class="section-divider"></div>
+    <h3>${escapeHtml(club.name)} • Goals</h3>
+    <div class="event-grid">
+     ${Array.from({ length: goalCount }, (_, index) => {
+      return `
+       <div class="event-row">
+        <div>
+         <label>Scorer</label>
+         <select class="event-player" data-kind="goal-player" data-team="${teamSide}" data-index="${index}">
+          <option value="">Choose jogador</option>
+          ${renderPlayerSelectOptions(clubId)}
+         </select>
+        </div>
+        <div>
+         <label>Assist</label>
+         <select class="event-assist" data-kind="goal-assist" data-team="${teamSide}" data-index="${index}">
+          <option value="">No assist</option>
+          ${renderPlayerSelectOptions(clubId)}
+         </select>
+        </div>
+       </div>
+      `;
+     }).join("")}
+    </div>
+   `;
+  }
+
+  function renderCardRows(match, teamSide, type, label) {
+   const isHome = teamSide === "home";
+   const clubId = isHome ? match.homeClubId : match.awayClubId;
+   const club = getClubById(clubId);
+   const cardEvents = match.events.filter(e => e.teamSide === teamSide && e.type === type);
+
+   return `
+    <div class="section-divider"></div>
+    <div class="card-row">
+     <h3>${escapeHtml(club.name)} • ${label}</h3>
+     <button class="btn add-card-row" data-team="${teamSide}" data-type="${type}">Add</button>
+    </div>
+    <div class="event-grid" id="card-wrap-${teamSide}-${type}">
+     ${cardEvents.map((event, index) => `
+      <div class="event-row">
+       <div>
+        <label>Player</label>
+        <select class="card-player" data-team="${teamSide}" data-type="${type}" data-index="${index}">
+         <option value="">Choose jogador</option>
+         ${renderPlayerSelectOptions(clubId)}
+        </select>
+       </div>
+       <div class="actions" style="align-items:end;">
+        <button class="btn danger remove-card-row" data-team="${teamSide}" data-type="${type}" data-index="${index}">Remove</button>
+       </div>
+      </div>
+     `).join("")}
+    </div>
+   `;
+  }
+
+  function renderMatchForm(match) {
+   const home = getClubById(match.homeClubId);
+   const away = getClubById(match.awayClubId);
+   const canSubmit = canSubmitMatch(match.homeClubId, match.awayClubId);
+   const locked = !canSubmit || match.status === "approved";
+
+   return `
+    <div>
+     <div class="list-item" style="margin-bottom:16px;">
+      <strong>${escapeHtml(home.name)} v ${escapeHtml(away.name)}</strong>
+      <div class="small" style="margin-top:6px;">Round ${match.round} • ${escapeHtml(match.date)}</div>
+      <div class="small" style="margin-top:4px;">Current status: ${match.status === "approved" ? "Approved" : match.status === "pending" ? "Pending approval" : "Scheduled"}</div>
+     </div>
+
+     ${
+      locked && match.status === "approved"
+       ? `<div class="empty" style="margin-bottom:16px;">This fixture has already been approved and is locked for direct editing.</div>`
+       : !canSubmit
+        ? `<div class="empty" style="margin-bottom:16px;">You do not have permission to submit the result for this fixture.</div>`
+        : ""
+     }
+
+     <div class="form-grid">
+      <div>
+       <label for="matchHomeGoals">Goals ${escapeHtml(home.name)}</label>
+       <input id="matchHomeGoals" type="number" min="0" value="${match.homeGoals === "" ? "" : match.homeGoals}" ${locked ? "disabled" : ""} />
+      </div>
+      <div>
+       <label for="matchAwayGoals">Goals ${escapeHtml(away.name)}</label>
+       <input id="matchAwayGoals" type="number" min="0" value="${match.awayGoals === "" ? "" : match.awayGoals}" ${locked ? "disabled" : ""} />
+      </div>
+     </div>
+
+     ${renderGoalRows(match, "home")}
+     ${renderGoalRows(match, "away")}
+     ${renderCardRows(match, "home", "yellow", "Yellow cards")}
+     ${renderCardRows(match, "away", "yellow", "Yellow cards")}
+     ${renderCardRows(match, "home", "red", "Red cards")}
+     ${renderCardRows(match, "away", "red", "Red cards")}
+
+     <div class="section-divider"></div>
+
+     <div class="form-grid">
+      <div>
+       <label for="matchEvidenceFile">Evidence image</label>
+       <input id="matchEvidenceFile" type="file" accept="image/*" ${locked ? "disabled" : ""} />
+       <div class="small" style="margin-top:8px;">The image is stored in this browser on this device, with no external link required.</div>
+       ${renderEvidencePreview(match)}
+      </div>
+      <div>
+       <label for="matchDateInput">Date</label>
+       <input id="matchDateInput" type="date" value="${escapeHtml(match.date || "")}" ${locked ? "disabled" : ""} />
+      </div>
+     </div>
+
+     <div style="margin-top:16px;">
+      <label for="matchNotes">Notes</label>
+      <textarea id="matchNotes" ${locked ? "disabled" : ""}>${escapeHtml(match.notes || "")}</textarea>
+     </div>
+
+     <div class="actions" style="margin-top:16px;">
+      ${!locked ? `<button class="btn success" id="saveMatchBtn" data-match-id="${match.id}">Submit for approval</button>` : ""}
+      ${!locked ? `<button class="btn warning" id="saveDraftBtn" data-match-id="${match.id}">Guardar rascunho</button>` : ""}
+     </div>
+
+     <div class="section-divider"></div>
+     <h3>Audit trail</h3>
+     ${
+      match.audit.length ? `
+       <div class="list">
+        ${match.audit.map(item => `
+         <div class="list-item">
+          <strong>${escapeHtml(item.by)}</strong>
+          <div class="small" style="margin-top:4px;">${escapeHtml(item.at)}</div>
+          <div class="small" style="margin-top:8px;color:var(--text);">${escapeHtml(item.action)}</div>
+         </div>
+        `).join("")}
+       </div>
+      ` : `<div class="empty">No audit records yet.</div>`
+     }
+    </div>
+   `;
+  }
+
+  function renderMatchesTab() {
+   const club = getCurrentClub();
+   const unlockedRounds = getUnlockedRoundCount();
+   const nextReleaseDate = getNextReleaseDate();
+   const availableMatches = isAdmin()
+    ? state.matches.filter(match => isMatchUnlocked(match))
+    : state.matches.filter(match => club && (match.homeClubId === club.id || match.awayClubId === club.id) && isMatchUnlocked(match));
+
+   const visibleMatches = [...availableMatches].sort((a, b) => {
+    if (Number(a.round) !== Number(b.round)) return Number(a.round) - Number(b.round);
+    return String(a.date).localeCompare(String(b.date));
+   });
+
+   const selectedMatch = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
+   const formMatch = selectedMatch && isMatchUnlocked(selectedMatch) && (isAdmin() || (club && (selectedMatch.homeClubId === club.id || selectedMatch.awayClubId === club.id)))
+    ? selectedMatch
+    : null;
+
+   const releaseMessage = nextReleaseDate
+    ? `Rounds 1-${unlockedRounds} are currently open. The next three rounds will open on ${escapeHtml(formatReleaseDate(nextReleaseDate))}.`
+    : 'All 18 rounds are now open.';
+
+   return `
+    <section class="tab ${state.currentTab === "partidas" ? "active" : ""}">
+     <div class="breadcrumbs">Home > Fixtures</div>
+     <div class="page-header">
+      <div>
+       <h2>Match centre</h2>
+       <p class="muted">Report results, upload evidence and send completed fixtures through for approval.</p>
+      </div>
+      <span class="badge">${releaseMessage}</span>
+     </div>
+
+     <div class="grid grid-2">
+      <div class="card">
+       <h3>Select a fixture</h3>
+       <div style="margin-bottom:16px;">
+        <label for="matchSelect">Fixture</label>
+        <select id="matchSelect">
+         <option value="">Choose a fixture</option>
+         ${availableMatches.map(match => `
+          <option value="${match.id}" ${state.selectedMatchId === match.id ? "selected" : ""}>
+           ${escapeHtml(formatMatchLabel(match))} — Round ${match.round}
+          </option>
+         `).join("")}
+        </select>
+       </div>
+
+       ${formMatch ? renderMatchForm(formMatch) : `<div class="empty">Choose one of the currently open fixtures to view the full reporting form.</div>`}
+      </div>
+
+      <div class="card">
+       <div class="card-row">
+        <h3>Available fixtures</h3>
+        <span class="badge">${isAdmin() ? "Administrator view" : "My club"}</span>
+       </div>
+
+       ${
+        visibleMatches.length ? `
+         <div class="list">
+          ${visibleMatches.map(match => {
+           const home = getClubById(match.homeClubId);
+           const away = getClubById(match.awayClubId);
+           const score = match.homeGoals !== "" && match.awayGoals !== "" ? ` • ${match.homeGoals}–${match.awayGoals}` : "";
+           const pillClass = match.status === "approved" ? "approved" : match.status === "pending" ? "pending" : "";
+           const label = match.status === "approved" ? "Approved" : match.status === "pending" ? "Pending" : "Scheduled";
+           return `
+            <div class="list-item">
+             <strong>${escapeHtml(home.name)} v ${escapeHtml(away.name)}</strong>${score}
+             <br>
+             <span class="small">Round ${match.round} • ${escapeHtml(match.date)}</span>
+             <div style="margin-top:10px;"><span class="pill ${pillClass}">${label}</span></div>
+             <div class="actions" style="margin-top:12px;">
+              ${(isAdmin() || canSubmitMatch(match.homeClubId, match.awayClubId)) ? `<button class="btn quick-open-match" data-match-id="${match.id}">Open</button>` : ""}
+             </div>
+            </div>
+           `;
+          }).join("")}
+         </div>
+        ` : `<div class="empty">There are no open fixtures available for this user right now.</div>`
+       }
+      </div>
+     </div>
+    </section>
+   `;
+  }
+
+
+  function renderLeagueTab() {
+   const club = getCurrentClub();
+   const table = buildLeagueTable();
+   const rounds = getMatchesGroupedByRound();
+   const topScorers = getLeagueTopScorers(12);
+   const mostBooked = getLeagueMostBooked(12);
+
+   return `
+    <section class="tab ${state.currentTab === "liga" ? "active" : ""}">
+     <div class="breadcrumbs">Home > League</div>
+     <div class="page-header">
+      <div>
+       <h2>League</h2>
+       <p class="muted">Full standings, fixtures by round and key statistical leaders across the competition.</p>
+      </div>
+     </div>
+
+     <div class="grid grid-2">
+      <div class="card">
+       <h3>Full standings</h3>
+       <div class="table-wrap" style="margin-top:12px;">
+        <table>
+         <thead><tr><th>Pos</th><th>Club</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
+         <tbody>
+          ${table.map(row => `
+           <tr ${club && row.clubId === club.id ? 'style="background:rgba(56,189,248,0.12);"' : ""}>
+            <td>${row.position}</td>
+            <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
+            <td>${row.points}</td>
+            <td>${row.played}</td>
+            <td>${row.wins}</td>
+            <td>${row.draws}</td>
+            <td>${row.losses}</td>
+            <td>${row.gf}</td>
+            <td>${row.ga}</td>
+            <td>${row.gd}</td>
+           </tr>
+          `).join("")}
+         </tbody>
+        </table>
+       </div>
+      </div>
+
+      <div class="card">
+       <h3>Top scorers</h3>
+       ${
+        topScorers.length ? `
+         <div class="table-wrap" style="margin-top:12px;">
+          <table>
+           <thead><tr><th>Player</th><th>Club</th><th>G</th><th>A</th></tr></thead>
+           <tbody>
+            ${topScorers.map(item => `
+             <tr>
+              <td>${escapeHtml(item.playerName)}</td>
+              <td>${renderClubCell(item.clubName, getClubLogoUrl(getClubById(item.clubId)))}</td>
+              <td>${item.goals}</td>
+              <td>${item.assists}</td>
+             </tr>
+            `).join("")}
+           </tbody>
+          </table>
+         </div>
+        ` : `<div class="empty" style="margin-top:12px;">There are no approved goals in the league yet.</div>`
+       }
+
+       <div class="section-divider"></div>
+
+       <h3>Cards</h3>
+       ${
+        mostBooked.length ? `
+         <div class="table-wrap" style="margin-top:12px;">
+          <table>
+           <thead><tr><th>Player</th><th>Club</th><th>CA</th><th>CV</th></tr></thead>
+           <tbody>
+            ${mostBooked.map(item => `
+             <tr>
+              <td>${escapeHtml(item.playerName)}</td>
+              <td>${renderClubCell(item.clubName, getClubLogoUrl(getClubById(item.clubId)))}</td>
+              <td>${item.yellow}</td>
+              <td>${item.red}</td>
+             </tr>
+            `).join("")}
+           </tbody>
+          </table>
+         </div>
+        ` : `<div class="empty" style="margin-top:12px;">There are no approved cards in the league yet.</div>`
+       }
+      </div>
+     </div>
+
+     <div class="card" style="margin-top:18px;">
+      <h3>Fixtures by round</h3>
+      ${
+       rounds.length ? `
+        <div class="list" style="margin-top:12px;">
+         ${rounds.map(group => `
+          <div class="list-item">
+           <strong>Round ${group.round}</strong>
+           <div class="table-wrap" style="margin-top:12px;">
+            <table>
+             <thead><tr><th>Match</th><th>Result</th><th>Status</th><th>Cards</th><th>Date</th></tr></thead>
+             <tbody>
+              ${group.matches.map(match => {
+               const home = getClubById(match.homeClubId);
+               const away = getClubById(match.awayClubId);
+               const result = match.homeGoals !== "" && match.awayGoals !== "" ? `${match.homeGoals}–${match.awayGoals}` : "—";
+               const homeY = match.events.filter(e => e.teamSide === "home" && e.type === "yellow").length;
+               const awayY = match.events.filter(e => e.teamSide === "away" && e.type === "yellow").length;
+               const homeR = match.events.filter(e => e.teamSide === "home" && e.type === "red").length;
+               const awayR = match.events.filter(e => e.teamSide === "away" && e.type === "red").length;
+               const cardsLabel = `${home.name}: ${homeY} CA / ${homeR} CV • ${away.name}: ${awayY} CA / ${awayR} CV`;
+               const statusLabel = match.status === "approved" ? "Approved" : match.status === "pending" ? "Pending" : "Scheduled";
+               return `
+                <tr>
+                 <td>${renderClubCell(home.name, getClubLogoUrl(home))} <span class="small">vs</span> ${renderClubCell(away.name, getClubLogoUrl(away))}</td>
+                 <td>${result}</td>
+                 <td>${statusLabel}</td>
+                 <td>${escapeHtml(cardsLabel)}</td>
+                 <td>${escapeHtml(match.date)}</td>
+                </tr>
+               `;
+              }).join("")}
+             </tbody>
+            </table>
+           </div>
+          </div>
+         `).join("")}
+        </div>
+       ` : `<div class="empty">There are no recorded fixtures in the league yet.</div>`
+      }
+     </div>
+    </section>
+   `;
+  }
+
+  function renderHistoricoTab() {
+   const club = getCurrentClub();
+   const matches = isAdmin()
+    ? [...state.matches].sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    : club
+     ? getClubAllMatches(club.id).sort((a, b) => String(b.date).localeCompare(String(a.date)))
+     : [];
+
+   return `
+    <section class="tab ${state.currentTab === "historico" ? "active" : ""}">
+     <div class="breadcrumbs">Home > History</div>
+     <div class="page-header">
+      <div>
+       <h2>History completo</h2>
+       <p class="muted">Review fixtures, evidence, status and recorded details.</p>
+      </div>
+     </div>
+
+     <div class="card">
+      ${
+       matches.length ? `
+        <div class="list">
+         ${matches.map(match => {
+          const home = getClubById(match.homeClubId);
+          const away = getClubById(match.awayClubId);
+          const score = match.homeGoals !== "" && match.awayGoals !== "" ? `${match.homeGoals}–${match.awayGoals}` : "No result";
+          const label = match.status === "approved" ? "Approved" : match.status === "pending" ? "Pending" : "Scheduled";
+          const cls = match.status === "approved" ? "approved" : match.status === "pending" ? "pending" : "";
+          return `
+           <div class="list-item">
+            <div class="card-row">
+             <div>
+              <strong>${escapeHtml(home.name)} v ${escapeHtml(away.name)}</strong>
+              <div class="small" style="margin-top:6px;">Round ${match.round} • ${escapeHtml(match.date)}</div>
+             </div>
+             <div><span class="pill ${cls}">${label}</span></div>
+            </div>
+
+            <div style="margin-top:12px;font-size:1.1rem;font-weight:700;">${escapeHtml(score)}</div>
+            <div class="small" style="margin-top:10px;line-height:1.7;">${match.notes ? escapeHtml(match.notes) : "No notes added."}</div>
+
+            ${renderEvidencePreview(match)}
+
+            <div class="actions" style="margin-top:14px;">
+             <button class="btn quick-open-match" data-match-id="${match.id}">Open detalhes</button>
+            </div>
+           </div>
+          `;
+         }).join("")}
+        </div>
+       ` : `<div class="empty">There is no history available yet.</div>`
+      }
+     </div>
+    </section>
+   `;
+  }
+
+  function renderAprovacoesTab() {
+   const approvals = getPendingApprovalsForUser();
+
+   return `
+    <section class="tab ${state.currentTab === "aprovacoes" ? "active" : ""}">
+     <div class="breadcrumbs">Home > Approvals</div>
+     <div class="page-header">
+      <div>
+       <h2>Approvals pendentes</h2>
+       <p class="muted">Review results submitted by other managers.</p>
+      </div>
+     </div>
+
+     <div class="card">
+      ${
+       approvals.length ? `
+        <div class="list">
+         ${approvals.map(match => {
+          const home = getClubById(match.homeClubId);
+          const away = getClubById(match.awayClubId);
+          return `
+           <div class="list-item">
+            <strong>${escapeHtml(home.name)} ${match.homeGoals}–${match.awayGoals} ${escapeHtml(away.name)}</strong>
+            <div class="small" style="margin-top:6px;">Round ${match.round} • ${escapeHtml(match.date)}</div>
+            <div class="small" style="margin-top:8px;color:var(--text);">${escapeHtml(match.notes || "No notes added.")}</div>
+            ${renderEvidencePreview(match)}
+            <div class="actions" style="margin-top:14px;">
+             <button class="btn success approve-match" data-match-id="${match.id}">Approve</button>
+             <button class="btn danger reject-match" data-match-id="${match.id}">Reject</button>
+             <button class="btn quick-open-match" data-match-id="${match.id}">Open</button>
+            </div>
+           </div>
+          `;
+         }).join("")}
+        </div>
+       ` : `<div class="empty">There are no pending approvals for this user.</div>`
+      }
+     </div>
+    </section>
+   `;
+  }
+
+  function renderAdminTab() {
+   const table = buildLeagueTable();
+   return `
+    <section class="tab ${state.currentTab === "administracao" ? "active" : ""}">
+     <div class="breadcrumbs">Home > Administration</div>
+     <div class="page-header">
+      <div>
+       <h2>Administration</h2>
+       <p class="muted">League-wide overview of clubs, users and fixtures.</p>
+      </div>
+     </div>
+
+     <div class="grid grid-4">
+      <div class="card"><h3>Clubs</h3><strong>${state.clubs.length}</strong></div>
+      <div class="card"><h3>Global players</h3><strong>${state.players.length}</strong></div>
+      <div class="card"><h3>Matches</h3><strong>${state.matches.length}</strong></div>
+      <div class="card"><h3>Managers</h3><strong>${state.users.filter(u => u.role === "manager").length}</strong></div>
+     </div>
+
+     <div class="card" style="margin-top:18px;">
+      <h3>Full table</h3>
+      <div class="table-wrap">
+       <table>
+        <thead><tr><th>Pos</th><th>Club</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GM</th><th>GS</th><th>SG</th></tr></thead>
+        <tbody>
+         ${table.map(row => `
+          <tr>
+           <td>${row.position}</td>
+           <td>${renderClubCell(row.clubName, getClubLogoUrl(getClubById(row.clubId)))}</td>
+           <td>${row.points}</td>
+           <td>${row.played}</td>
+           <td>${row.wins}</td>
+           <td>${row.draws}</td>
+           <td>${row.losses}</td>
+           <td>${row.gf}</td>
+           <td>${row.ga}</td>
+           <td>${row.gd}</td>
+          </tr>
+         `).join("")}
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </section>
+   `;
+  }
+
+  function attachAppEvents() {
+   document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+   });
+
+   const logoutBtn = document.getElementById("sidebarLogoutBtn");
+   if (logoutBtn) logoutBtn.addEventListener("click", logout);
+
+   const matchSelect = document.getElementById("matchSelect");
+   if (matchSelect) {
+    matchSelect.addEventListener("change", (e) => {
+     state.selectedMatchId = e.target.value ? Number(e.target.value) : null;
+     saveUiState();
+     render();
+    });
+   }
+
+   document.querySelectorAll(".quick-open-match").forEach(btn => {
+    btn.addEventListener("click", () => openMatch(btn.dataset.matchId));
+   });
+
+   document.querySelectorAll(".approve-match").forEach(btn => {
+    btn.addEventListener("click", () => approveMatch(Number(btn.dataset.matchId)));
+   });
+
+   document.querySelectorAll(".reject-match").forEach(btn => {
+    btn.addEventListener("click", () => rejectMatch(Number(btn.dataset.matchId)));
+   });
+
+   const evidenceFileInput = document.getElementById("matchEvidenceFile");
+   if (evidenceFileInput) {
+    evidenceFileInput.addEventListener("change", () => {
+     const file = evidenceFileInput.files?.[0];
+     if (!file) {
+      delete evidenceFileInput.dataset.imageDate;
+      return;
+     }
+     const reader = new FileReader();
+     reader.onload = () => {
+      evidenceFileInput.dataset.imageDate = typeof reader.result === "string" ? reader.result : "";
+      const match = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
+      if (match && evidenceFileInput.dataset.imageDate) {
+       match.evidenceImage = evidenceFileInput.dataset.imageDate;
+       saveAllToLocalSnapshot();
+       render();
+       toast("Evidence image carregada.");
+      }
+     };
+     reader.readAsDateURL(file);
+    });
+   }
+
+   const saveMatchBtn = document.getElementById("saveMatchBtn");
+   if (saveMatchBtn) {
+    saveMatchBtn.addEventListener("click", () => saveMatch(Number(saveMatchBtn.dataset.matchId), "pending"));
+   }
+
+   const saveDraftBtn = document.getElementById("saveDraftBtn");
+   if (saveDraftBtn) {
+    saveDraftBtn.addEventListener("click", () => saveMatch(Number(saveDraftBtn.dataset.matchId), "scheduled"));
+   }
+
+   document.querySelectorAll(".add-card-row").forEach(btn => {
+    btn.addEventListener("click", () => {
+     const match = getMatchById(state.selectedMatchId);
+     if (!match) return;
+     match.events.push({
+      teamSide: btn.dataset.team,
+      type: btn.dataset.type,
+      player: "",
+      assist: ""
+     });
+     render();
+    });
+   });
+
+   document.querySelectorAll(".remove-card-row").forEach(btn => {
+    btn.addEventListener("click", () => {
+     const match = getMatchById(state.selectedMatchId);
+     if (!match) return;
+     const filtered = [];
+     let currentIndex = 0;
+     match.events.forEach(e => {
+      if (e.teamSide === btn.dataset.team && e.type === btn.dataset.type) {
+       if (currentIndex !== Number(btn.dataset.index)) filtered.push(e);
+       currentIndex++;
+      } else {
+       filtered.push(e);
+      }
+     });
+     match.events = filtered;
+     render();
+    });
+   });
+
+   setTimeout(() => {
+    const match = state.selectedMatchId ? getMatchById(state.selectedMatchId) : null;
+    if (!match) return;
+
+    const goalEvents = match.events.filter(e => e.type === "goal");
+    goalEvents.forEach((event, i) => {
+     const teamEvents = goalEvents.filter(x => x.teamSide === event.teamSide);
+     const index = teamEvents.findIndex((x, idx) => idx >= 0 &&–=== event);
+     const playerEl = document.querySelector(`[data-kind="goal-player"][data-team="${event.teamSide}"][data-index="${index}"]`);
+     const assistEl = document.querySelector(`[data-kind="goal-assist"][data-team="${event.teamSide}"][data-index="${index}"]`);
+     if (playerEl) playerEl.value = event.player || "";
+     if (assistEl) assistEl.value = event.assist || "";
+    });
+
+    ["home", "away"].forEach(team => {
+     ["yellow", "red"].forEach(type => {
+      const events = match.events.filter(e => e.teamSide === team && e.type === type);
+      events.forEach((event, index) => {
+       const el = document.querySelector(`.card-player[data-team="${team}"][data-type="${type}"][data-index="${index}"]`);
+       if (el) el.value = event.player || "";
+      });
+     });
+    });
+   }, 0);
+  }
+
+  function collectFormEvents(match) {
+   const events = [];
+
+   const homeGoals = Number(document.getElementById("matchHomeGoals")?.value || 0);
+   const awayGoals = Number(document.getElementById("matchAwayGoals")?.value || 0);
+
+   for (let i = 0; i < homeGoals; i++) {
+    const player = document.querySelector(`[data-kind="goal-player"][data-team="home"][data-index="${i}"]`)?.value || "";
+    const assist = document.querySelector(`[data-kind="goal-assist"][data-team="home"][data-index="${i}"]`)?.value || "";
+    if (player) events.push({ teamSide: "home", type: "goal", player, assist });
+   }
+
+   for (let i = 0; i < awayGoals; i++) {
+    const player = document.querySelector(`[data-kind="goal-player"][data-team="away"][data-index="${i}"]`)?.value || "";
+    const assist = document.querySelector(`[data-kind="goal-assist"][data-team="away"][data-index="${i}"]`)?.value || "";
+    if (player) events.push({ teamSide: "away", type: "goal", player, assist });
+   }
+
+   document.querySelectorAll(".card-player").forEach(el => {
+    if (el.value) {
+     events.push({
+      teamSide: el.dataset.team,
+      type: el.dataset.type,
+      player: el.value,
+      assist: ""
+     });
+    }
+   });
+
+   return events;
+  }
+
+  function saveMatch(matchId, targetStatus) {
+   const match = getMatchById(matchId);
+   const user = getCurrentUser();
+   if (!match || !user) return;
+
+   match.homeGoals = Number(document.getElementById("matchHomeGoals")?.value || 0);
+   match.awayGoals = Number(document.getElementById("matchAwayGoals")?.value || 0);
+   match.date = document.getElementById("matchDateInput")?.value || match.date;
+   const evidenceFileInput = document.getElementById("matchEvidenceFile");
+   if (evidenceFileInput?.dataset.imageDate) match.evidenceImage = evidenceFileInput.dataset.imageDate;
+   match.notes = document.getElementById("matchNotes")?.value || "";
+   match.events = collectFormEvents(match);
+
+   if (targetStatus === "pending") {
+    match.status = "pending";
+    match.submittedByUserId = user.id;
+    match.approvedByUserId = null;
+    match.audit.push({
+     at: nowStamp(),
+     by: user.name,
+     action: "Result submitted for approval"
+    });
+    toast("Result submitted for approval.");
+   } else {
+    match.status = "scheduled";
+    match.audit.push({
+     at: nowStamp(),
+     by: user.name,
+     action: "Draft saved"
+    });
+    toast("Draft saved.", "warning");
+   }
+
+   saveAllToLocalSnapshot();
+   render();
+  }
+
+  function approveMatch(matchId) {
+   const match = getMatchById(matchId);
+   const user = getCurrentUser();
+   if (!match || !user || !canApproveMatch(match)) return;
+
+   match.status = "approved";
+   match.approvedByUserId = user.id;
+   match.audit.push({
+    at: nowStamp(),
+    by: user.name,
+    action: "Result approved"
+   });
+
+   saveAllToLocalSnapshot();
+   render();
+   toast("Match approved successfully.");
+  }
+
+  function rejectMatch(matchId) {
+   const match = getMatchById(matchId);
+   const user = getCurrentUser();
+   if (!match || !user || !canApproveMatch(match)) return;
+
+   match.status = "scheduled";
+   match.approvedByUserId = null;
+   match.audit.push({
+    at: nowStamp(),
+    by: user.name,
+    action: "Result rejected and returned for editing"
+   });
+
+   saveAllToLocalSnapshot();
+   render();
+   toast("Fixture rejeitada e devolvida.", "danger");
+  }
+
+  window.addEventListener("DOMContentLoaded", init);
+ </script>
 
 </body>
 </html>
