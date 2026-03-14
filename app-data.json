@@ -1,0 +1,21 @@
+{
+  "league": {
+    "name": "Liga Manager EAFC",
+    "season": "Temporada 2026",
+    "championships": [
+      {
+        "id": 1,
+        "name": "Premier League",
+        "rounds": 38,
+        "format": "pontos corridos"
+      }
+    ]
+  },
+  "users": [
+    { "id": 1, "name": "Administrador", "role": "admin", "clubId": null },
+    { "id": 2, "name": "Diogo", "role": "manager", "clubId": 1 },
+    { "id": 3, "name": "Rodrigo", "role": "manager", "clubId": 2 },
+    { "id": 4, "name": "Braulio", "role": "manager", "clubId": 3 },
+    { "id": 5, "name": "Manager City", "role": "manager", "clubId": 4 }
+  ]
+}
