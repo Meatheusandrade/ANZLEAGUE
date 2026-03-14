@@ -620,12 +620,14 @@
       return JSON.parse(el.textContent);
     }
 
-    function init() {
+    async function init() {
       try {
-        const appData = loadEmbeddedJSON("data-app");
-        const clubsData = loadEmbeddedJSON("data-clubs");
-        const playersData = loadEmbeddedJSON("data-players");
-        const matchesData = loadEmbeddedJSON("data-matches");
+        const [appData, clubsData, playersData, matchesData] = await Promise.all([
+          fetch("./data/app-data.json").then(r => r.json()),
+          fetch("./data/clubs.json").then(r => r.json()),
+          fetch("./data/players.json").then(r => r.json()),
+          fetch("./data/matches.json").then(r => r.json())
+        ]);
 
         const savedUi = loadUiState();
 
